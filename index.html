@@ -1,0 +1,3236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام متابعة الطلاب - النسخة النهائية</title>
+<style>
+  :root{
+    --bg:#070707;--panel:#101010;--panel2:#151515;--gold:#d7ad55;--gold2:#f1cf7a;
+    --text:#f6f1e7;--muted:#aaa395;--line:#292722;--danger:#e35d6a;--green:#54c39a;
+    --blue:#4a9eff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{margin:0;min-height:100%;font-family:Tahoma,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+  body{
+    background:
+      radial-gradient(circle at 15% 5%,rgba(215,173,85,.09),transparent 28%),
+      radial-gradient(circle at 90% 85%,rgba(215,173,85,.06),transparent 30%),
+      #070707;
+    padding-bottom:30px;
+  }
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  button:active{transform:scale(.98)}
+  .hidden{display:none!important}
+  .top{
+    height:76px;position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    justify-content:space-between;padding:0 4vw;background:rgba(7,7,7,.88);
+    backdrop-filter:blur(18px);border-bottom:1px solid var(--line)
+  }
+  .brand{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:900}
+  .logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;
+    background:linear-gradient(145deg,#f0c96b,#a97828);color:#080808;font-weight:1000;
+    box-shadow:0 0 30px rgba(215,173,85,.18)}
+  .teacherBtn{
+    border:1px solid rgba(215,173,85,.35);background:rgba(215,173,85,.08);color:var(--gold2);
+    border-radius:12px;padding:10px 15px;font-weight:800
+  }
+  .teacherBtn.hidden{display:none!important}
+  .wrap{width:min(1180px,92%);margin:34px auto}
+  .hero{
+    border:1px solid rgba(215,173,85,.24);border-radius:30px;padding:42px;
+    background:linear-gradient(135deg,rgba(215,173,85,.12),rgba(255,255,255,.015) 55%),#0d0d0d;
+    box-shadow:0 30px 80px rgba(0,0,0,.45);position:relative;overflow:hidden
+  }
+  .hero:before{content:"";position:absolute;width:380px;height:380px;border:1px solid rgba(215,173,85,.13);
+    border-radius:50%;left:-180px;top:-230px}
+  .hero h1{font-size:clamp(28px,4vw,45px);margin:0 0 12px;letter-spacing:-1px}
+  .hero p{color:#c3bcae;line-height:1.9;margin:0;max-width:650px}
+  .searchBox{display:flex;gap:10px;max-width:700px;margin-top:28px;position:relative;z-index:2}
+  .searchBox.hidden{display:none!important}
+  .input,.select,.textarea{
+    width:100%;border:1px solid #33302a;background:#11110f;color:var(--text);
+    border-radius:14px;padding:14px 15px;outline:none
+  }
+  .input::placeholder,.textarea::placeholder{color:#77736b}
+  .input:focus,.select:focus,.textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(215,173,85,.08)}
+  .searchBox .input{background:#0a0a0a}
+  .searchBtn{
+    border:0;border-radius:14px;padding:0 22px;background:linear-gradient(145deg,#f0c96b,#ad7d2d);
+    color:#0a0a0a;font-weight:1000;white-space:nowrap
+  }
+  .card{
+    background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.01));
+    border:1px solid var(--line);border-radius:23px;padding:24px;
+    box-shadow:0 18px 55px rgba(0,0,0,.2)
+  }
+  .sectionHead{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;flex-wrap:wrap}
+  .sectionHead h2{margin:0;font-size:20px}
+  .muted{color:var(--muted);font-size:12px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+  .stat{border:1px solid var(--line);border-radius:17px;padding:17px;background:#0d0d0c}
+  .stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;color:var(--gold2);margin-top:7px}
+  .btn{border:0;border-radius:12px;padding:11px 15px;font-weight:800;transition:.18s}
+  .btn.gold{background:linear-gradient(145deg,#edc56c,#a97828);color:#0a0a0a}
+  .btn.soft{background:#1a1917;color:#ddd6c9;border:1px solid #302e29}
+  .btn.danger{background:rgba(227,93,106,.15);color:#ff8792;border:1px solid rgba(227,93,106,.2)}
+  .btn.green{background:rgba(84,195,154,.12);color:#72d7b0;border:1px solid rgba(84,195,154,.2)}
+  .btn.blue{background:rgba(74,158,255,.12);color:#4a9eff;border:1px solid rgba(74,158,255,.2)}
+  .studentGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .student{background:#0e0e0d;border:1px solid var(--line);border-radius:19px;padding:18px;transition:.2s}
+  .student:hover{transform:translateY(-2px);border-color:#464137}
+  .studentTop{display:flex;align-items:center;gap:12px}
+  .avatar{
+    width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+    background:rgba(215,173,85,.1);color:var(--gold2);font-weight:900;border:1px solid rgba(215,173,85,.15);
+    font-size:18px
+  }
+  .student h3{margin:0 0 5px;font-size:16px}.student p{margin:0;color:var(--muted);font-size:12px}
+  .badge{display:inline-block;margin:15px 0 12px;padding:6px 9px;border-radius:8px;
+    background:rgba(215,173,85,.08);border:1px solid rgba(215,173,85,.13);color:var(--gold2);font-size:11px}
+  .actions{display:flex;gap:7px;flex-wrap:wrap;position:relative;z-index:2}
+  .student>*{position:relative;z-index:2}
+  .student input,.student button,.student select,.student textarea,.student label{position:relative;z-index:3}
+  .tableWrap{overflow:auto}
+  .table{width:100%;min-width:680px;border-collapse:separate;border-spacing:0}
+  .table th{padding:13px;text-align:right;background:#121210;color:#8f8a80;font-size:11px}
+  .table td{padding:14px;border-top:1px solid var(--line);font-size:13px;vertical-align:top}
+  .score{font-weight:1000}.good{color:var(--green)}.mid{color:var(--gold2)}.low{color:#ff7b86}
+  .note{background:#121210;border:1px solid #292722;border-radius:11px;padding:10px;color:#aaa395;font-size:12px;line-height:1.7}
+  .parentNote{background:rgba(215,173,85,.07);border:1px solid rgba(215,173,85,.17);color:#ddc58e;border-radius:11px;padding:9px;margin-top:7px;font-size:12px}
+  .teacherShell{display:grid;grid-template-columns:225px 1fr;gap:20px}
+  .sidebar{
+    background:#0c0c0b;border:1px solid var(--line);border-radius:24px;padding:16px;height:max-content;
+    position:sticky;top:96px
+  }
+  .sideTitle{padding:10px 10px 17px;color:var(--gold2);font-weight:900}
+  .sidebar button{width:100%;text-align:right;border:0;background:transparent;color:#969188;padding:12px;border-radius:11px;margin:2px 0}
+  .sidebar button:hover,.sidebar button.active{background:#1b1915;color:#f3ead8}
+  .sideBottom{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .sideBottom button{width:100%;text-align:right;border:0;background:transparent;padding:12px;border-radius:11px;margin:2px 0;font-weight:800}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(7px);display:grid;place-items:center;padding:18px;z-index:50}
+  .modalBox{width:min(650px,100%);max-height:90vh;overflow:auto;background:#10100f;border:1px solid #38342d;border-radius:24px;padding:25px;box-shadow:0 35px 100px #000}
+  .modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .modalHead h2{margin:0}.close{border:1px solid #302e29;background:#191816;color:#ddd;width:36px;height:36px;border-radius:11px;font-size:19px}
+  .field{margin-bottom:13px}.field label{display:block;color:#9f998e;font-size:12px;margin-bottom:7px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .message{padding:11px 13px;border-radius:11px;background:rgba(215,173,85,.08);color:#ddc58e;border:1px solid rgba(215,173,85,.14);font-size:12px;margin-top:10px}
+  .error{background:rgba(227,93,106,.08);color:#ff8792;border-color:rgba(227,93,106,.15)}
+  .empty{text-align:center;padding:35px 15px;color:#77736b}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;background:#e8c36a;color:#080808;padding:12px 17px;border-radius:12px;font-weight:800;transition:.25s;z-index:100}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .searchTools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .searchTools .input{max-width:300px;flex:1}
+  .searchTools .select{max-width:200px}
+  .unread-badge{background:#e35d6a;color:white;border-radius:50%;padding:2px 10px;font-size:12px;margin-right:5px;display:inline-block;min-width:22px;text-align:center}
+  .batch-grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grade-row{display:grid;grid-template-columns:1fr 1fr 0.5fr 0.5fr;gap:8px;align-items:end;margin-top:8px}
+  .grade-row .field{margin:0}
+  .checkbox-label{display:flex;align-items:center;gap:8px;color:#9f998e;font-size:13px;cursor:pointer}
+  .checkbox-label input[type="checkbox"]{width:18px;height:18px;accent-color:var(--gold)}
+  .conversation{max-height:420px;overflow-y:auto;padding:14px;background:linear-gradient(180deg,#0c0c0b,#090909);border-radius:16px;border:1px solid var(--line);margin-bottom:12px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+  .msg{padding:12px 16px;border-radius:16px;max-width:82%;word-wrap:break-word;font-size:13.5px;line-height:1.7;animation:msgIn .25s ease}
+  @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .msg.parent{background:rgba(215,173,85,.14);border:1px solid rgba(215,173,85,.2);align-self:flex-start;color:#e8d4a0;border-bottom-right-radius:6px}
+  .msg.teacher{background:rgba(74,158,255,.14);border:1px solid rgba(74,158,255,.22);align-self:flex-end;color:#9bc4ff;border-bottom-left-radius:6px}
+  .msg .time{font-size:10px;color:#77736b;margin-top:6px;display:block}
+  .msg .seen{font-size:10px;color:#54c39a;margin-top:3px;display:block}
+  .parent-logout{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:10px 16px;background:rgba(227,93,106,.12);color:#ff8792;border:1px solid rgba(227,93,106,.25);border-radius:12px;cursor:pointer;font-size:13px;font-weight:800;transition:.2s}
+  .parent-logout:hover{background:rgba(227,93,106,.2)}
+  .group-tag{display:inline-block;padding:2px 10px;border-radius:10px;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.15);color:#4a9eff;font-size:11px;margin-right:5px}
+  .card{transition:border-color .2s,box-shadow .2s}
+  .card:hover{border-color:#3a372f}
+  @media(max-width:820px){
+    .teacherShell{grid-template-columns:1fr}
+    .sidebar{position:static;display:flex;flex-direction:column;gap:0;overflow:visible}
+    .sidebar{flex-wrap:wrap;flex-direction:row;gap:5px}
+    .sideTitle{display:none}
+    .sidebar > button[data-tab]{width:auto;white-space:nowrap;flex:0 0 auto}
+    .sideBottom{display:flex!important;width:100%;flex-basis:100%;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;order:99}
+    .sideBottom button{width:100%;text-align:center;background:rgba(227,93,106,.1);border:1px solid rgba(227,93,106,.25)!important;color:#ff8792!important;border-radius:12px;padding:12px;font-weight:900}
+    .grid2{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){.wrap{width:94%;margin:22px auto}.top{padding:0 3%}.brand{font-size:16px}.teacherBtn{font-size:11px;padding:9px 10px}.hero{padding:27px 20px;border-radius:23px}.searchBox{flex-direction:column}.searchBtn{padding:14px}.stats{grid-template-columns:1fr}.card{padding:18px}.searchTools{flex-direction:column}.batch-grade-grid{grid-template-columns:1fr}.grade-row{grid-template-columns:1fr}.conversation{max-height:340px}}
+  .backArrow{border:1px solid rgba(215,173,85,.28);background:rgba(215,173,85,.07);color:var(--gold2);border-radius:14px;padding:10px 14px;font-weight:900;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.2s}
+  .backArrow:hover{background:rgba(215,173,85,.14);transform:translateY(-1px)}
+  .backArrow span{font-size:13px}.teacherToolbar{display:flex;justify-content:flex-start;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+  .subjectFixed{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:#0b0b0b;color:var(--gold2);font-weight:900}
+  .subjectFixed small{color:var(--muted);font-weight:700}.report-item{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
+  .report-item:last-child{border-bottom:0}.report-rank{color:var(--gold2);font-weight:900;min-width:40px}
+
+
+
+
+.chatIn{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;width:100%;box-sizing:border-box}.chatIn .input{flex:1;min-width:0}
+.mic{width:44px;display:grid!important;place-items:center;;height:44px;border-radius:12px;border:0;background:linear-gradient(145deg,#f0c96b,#a97828);font-size:18px;flex-shrink:0;cursor:pointer}
+.mic.rec{background:#ff4d4d;color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,77,.6)}100%{box-shadow:0 0 0 10px rgba(255,77,77,0)}}
+.recBox{display:flex;gap:8px;align-items:center;background:#1a1917;border:1px solid #333;border-radius:12px;padding:8px 12px;flex:1}
+.dot{width:8px;height:8px;border-radius:50%;background:#ff4d4d;animation:b .8s infinite}@keyframes b{50%{opacity:.2}}
+
+/* WhatsApp Voice Style - Dark Gold */
+.voiceBubble{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#1a1917,#121210);
+  border:1px solid rgba(215,173,85,.2);
+  border-radius:18px 18px 18px 4px;
+  padding:10px 12px;
+  width: 92%; max-width: 220px;
+  max-width:100%;
+  min-width:0;
+  margin-top:8px;position:relative;
+  box-sizing:border-box;
+  overflow:hidden
+}
+.msg .voiceBubble{max-width:92%}
+.msg{max-width:82%;padding:8px 10px}
+.msg .voiceBubble{width:92%; max-width:220px}
+.msg{max-width:78%!important;padding:8px 10px!important}
+#chatConversation, #parentConversation{padding:8px!important}
+.chatConversation{padding:10px!important;gap:10px}
+#chatConversation, #parentConversation{max-height:55vh!important}
+
+.voiceBubble.mine{border-radius:18px 18px 4px 18px;background:linear-gradient(135deg,#1e1a12,#1a1610);border-color:rgba(215,173,85,.3)}
+.voicePlay{
+  width:42px;height:42px;border-radius:50%;border:0;flex-shrink:0;
+  background:linear-gradient(145deg,#f0c96b,#a97828);color:#0a0a0a;
+  display:grid;place-items:center;font-size:18px;cursor:pointer;
+  box-shadow:0 2px 10px rgba(215,173,85,.25);transition:.2s
+}
+.voicePlay:active{transform:scale(.92)}
+.voicePlay.playing{background:linear-gradient(145deg,#ff7a7a,#c0392b);color:#fff}
+.voiceWaveWrap{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
+.voiceWave{
+  display:flex;align-items:center;gap:2px;height:24px;flex:1;cursor:pointer;position:relative;min-width:0;width:100%;direction:ltr
+}
+.voiceBar{width:3px;background:#3a3630;border-radius:2px;transition:.2s}
+.voiceBar.active{background:var(--gold2)}
+.voiceBar.played{background:var(--gold)}
+.voiceMeta{display:flex;justify-content:space-between;align-items:center}
+.voiceTime{font-size:11px;color:var(--gold2);font-weight:700;font-variant-numeric:tabular-nums}
+.voiceDuration{font-size:11px;color:var(--muted)}
+.voiceProgress{position:absolute;inset:0;pointer-events:none}
+.permBox{background:rgba(227,93,106,.1);border:1px solid rgba(227,93,106,.2);border-radius:12px;padding:12px;margin:8px 0;font-size:12px;color:#ff9aa2}
+.permBox button{margin-top:8px}
+
+
+/* حماية بدون رعشة V6 */
+#offlineBlocker{position:fixed;inset:0;z-index:99999;background:rgba(7,7,7,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:20px;text-align:center}
+#offlineBlocker.show{display:flex}
+#offlineBlocker .icon{width:86px;height:86px;border-radius:28px;background:linear-gradient(145deg,#f0c96b,#a97828);display:grid;place-items:center;font-size:42px}
+#offlineBlocker h2{font-size:26px;color:#f1cf7a}
+#offlineBlocker p{color:#c3bcae;line-height:1.8;max-width:380px}
+#offlineBlocker .retryBtn{border:0;border-radius:14px;padding:14px 28px;background:linear-gradient(145deg,#f0c96b,#ad7d2d);color:#0a0a0a;font-weight:1000}
+
+
+  /* ===== تجميل: خلفية حديثة + حركة + نبض (بدون تغيير النظام) ===== */
+  html{scroll-behavior:smooth}
+  body{animation:pageIn .6s ease both}
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(rgba(215,173,85,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(215,173,85,.05) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+    mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+  }
+  body::after{
+    content:"";position:fixed;width:560px;height:560px;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle,rgba(215,173,85,.12),transparent 62%);
+    top:-160px;left:-130px;filter:blur(24px);
+    animation:orbFloat 15s ease-in-out infinite alternate;
+  }
+  @keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,90px) scale(1.18)}}
+  .wrap{position:relative;z-index:1}
+  .hero{animation:fadeUp .7s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .logo{animation:pulseGlow 3.2s ease-in-out infinite}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 30px rgba(215,173,85,.18)}50%{box-shadow:0 0 52px rgba(215,173,85,.42)}}
+  button{transition:all .22s ease}
+  button:hover{filter:brightness(1.18);box-shadow:0 6px 22px rgba(215,173,85,.22)}
+  input,select,textarea{transition:border-color .2s ease,box-shadow .2s ease}
+  input:focus,select:focus,textarea:focus{border-color:rgba(215,173,85,.55)!important;box-shadow:0 0 0 3px rgba(215,173,85,.14)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ===== تجميل: خلفية حديثة + حركة + نبض (بدون تغيير النظام) ===== */
+  html{scroll-behavior:smooth}
+  body{animation:pageIn .6s ease both}
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(rgba(215,173,85,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(215,173,85,.05) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+    mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+  }
+  body::after{
+    content:"";position:fixed;width:560px;height:560px;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle,rgba(215,173,85,.12),transparent 62%);
+    top:-160px;left:-130px;filter:blur(24px);
+    animation:orbFloat 15s ease-in-out infinite alternate;
+  }
+  @keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,90px) scale(1.18)}}
+  .wrap{position:relative;z-index:1}
+  .hero{animation:fadeUp .7s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .logo{animation:pulseGlow 3.2s ease-in-out infinite}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 30px rgba(215,173,85,.18)}50%{box-shadow:0 0 52px rgba(215,173,85,.42)}}
+  button{transition:all .22s ease}
+  button:hover{filter:brightness(1.18);box-shadow:0 6px 22px rgba(215,173,85,.22)}
+  input,select,textarea{transition:border-color .2s ease,box-shadow .2s ease}
+  input:focus,select:focus,textarea:focus{border-color:rgba(215,173,85,.55)!important;box-shadow:0 0 0 3px rgba(215,173,85,.14)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ===== تجميل: خلفية حديثة + حركة + نبض (بدون تغيير النظام) ===== */
+  html{scroll-behavior:smooth}
+  body{animation:pageIn .6s ease both}
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(rgba(215,173,85,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(215,173,85,.05) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+    mask-image:radial-gradient(ellipse at 50% 0%,black 25%,transparent 78%);
+  }
+  body::after{
+    content:"";position:fixed;width:560px;height:560px;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle,rgba(215,173,85,.12),transparent 62%);
+    top:-160px;left:-130px;filter:blur(24px);
+    animation:orbFloat 15s ease-in-out infinite alternate;
+  }
+  @keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,90px) scale(1.18)}}
+  .wrap{position:relative;z-index:1}
+  .hero{animation:fadeUp .7s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .logo{animation:pulseGlow 3.2s ease-in-out infinite}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 30px rgba(215,173,85,.18)}50%{box-shadow:0 0 52px rgba(215,173,85,.42)}}
+  button{transition:all .22s ease}
+  button:hover{filter:brightness(1.18);box-shadow:0 6px 22px rgba(215,173,85,.22)}
+  input,select,textarea{transition:border-color .2s ease,box-shadow .2s ease}
+  input:focus,select:focus,textarea:focus{border-color:rgba(215,173,85,.55)!important;box-shadow:0 0 0 3px rgba(215,173,85,.14)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="offlineBlocker">
+  <div class="icon">📡</div>
+  <h2>الرجاء التوصيل بالنت</h2>
+  <p>التطبيق لا يعمل بدون إنترنت. وصّل النت للمتابعة.<br>يكفي اتصال ضعيف جداً</p>
+  <button type="button" class="retryBtn" onclick="checkOnlineStatus()">إعادة المحاولة</button>
+</div>
+
+
+<header class="top">
+  <div class="brand"><span class="logo">✓</span><span>نظام متابعة الطلاب</span></div>
+  <button type="button" class="teacherBtn" onclick="openLogin()">دخول المعلم</button>
+</header>
+
+<main class="wrap">
+<section id="parentPage">
+  <div class="hero" id="parentHero">
+    <h1>متابعة الطالب</h1>
+    <p>أدخل كود الطالب للوصول إلى الدرجات والتسميعات وملاحظات المعلم والمحادثة.</p>
+    <div class="searchBox" id="parentSearchBox">
+      <input id="parentCode" class="input" placeholder="أدخل كود الطالب" autocomplete="off">
+      <button type="button" class="searchBtn" onclick="searchParent()">متابعة</button>
+    </div>
+  </div>
+  <div id="parentResult"></div>
+</section>
+
+<section id="teacherPage" class="hidden">
+  <div class="teacherToolbar"><button type="button" class="backArrow" onclick="logout()" aria-label="رجوع">← <span>رجوع</span></button></div>
+  <div class="teacherShell">
+    <aside class="sidebar">
+      <div class="sideTitle">لوحة المعلم</div>
+      <button type="button" class="active" data-tab="students" onclick="tab('students',this)">الطلاب</button>
+      <button type="button" data-tab="grades" onclick="tab('grades',this)">الدرجات</button>
+      <button type="button" data-tab="batch" onclick="tab('batch',this)">تسميع جماعي</button>
+      <button type="button" data-tab="messages" onclick="tab('messages',this)">المحادثات <span id="messageCount"></span></button>
+      <button type="button" data-tab="reports" onclick="tab('reports',this)">📊 التقرير</button>
+      <button type="button" data-tab="groups" onclick="tab('groups',this)">📋 المجموعات</button>
+    </aside>
+
+    <div>
+      <div id="studentsTab" class="teacherTab">
+        <div class="card">
+          <div class="sectionHead">
+            <div><h2>الطلاب</h2><div class="muted">إدارة الطلاب المسجلين</div></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="bulkDeleteBtn" class="btn soft" onclick="toggleBulkDeleteMode()">حذف مجموعة</button><button type="button" class="btn gold" onclick="openStudent()">+ إضافة طالب</button></div>
+          </div>
+          <div class="searchTools">
+            <select id="studentLevelFilter" class="select" onchange="renderStudents()"><option value="">جميع الصفوف</option></select>
+            <select id="studentGroupFilter" class="select" onchange="renderStudents()"><option value="">جميع المجموعات</option></select>
+            <input id="studentSearch" class="input" placeholder="ابحث باسم الطالب أو الكود" oninput="renderStudents()">
+          </div>
+<div id="bulkDeleteActions" class="hidden" style="display:flex;gap:8px;align-items:center;padding:10px;background:rgba(215,173,85,.1);border:1px solid rgba(215,173,85,.2);border-radius:12px;margin-bottom:10px;flex-wrap:wrap">
+  <span id="bulkDeleteCount" style="font-weight:700;color:var(--gold)">0 محدد</span>
+  <button type="button" class="btn soft" style="padding:6px 12px;font-size:12px" onclick="selectAllStudents()">تحديد الكل</button>
+  <button type="button" class="btn soft" style="padding:6px 12px;font-size:12px" onclick="deselectAllStudents()">إلغاء الكل</button>
+  <button type="button" id="doBulkDeleteBtn" class="btn" style="background:#ff4d4d;color:#fff;padding:6px 14px;font-size:12px;margin-right:auto" onclick="doBulkDelete()">حذف المحدد 🗑️</button>
+</div>
+
+<div id="studentsList" class="studentGrid"></div>
+        </div>
+      </div>
+
+      <div id="gradesTab" class="teacherTab hidden">
+        <div class="card">
+          <div class="sectionHead"><div><h2>الدرجات والتسميعات</h2><div class="muted">أضف أو راجع درجات الطلاب</div></div></div>
+          <div class="field"><label>الصف الدراسي</label><select id="gradeFilterLevel" class="select" onchange="renderGradeStudents()"><option value="">جميع الصفوف</option></select></div>
+          <div class="field"><label>المجموعة</label><select id="gradeFilterGroup" class="select" onchange="renderGradeStudents()"><option value="">جميع المجموعات</option></select></div>
+          <div class="field"><label>البحث عن طالب (اسم أو كود)</label><input id="gradeStudentSearch" class="input" placeholder="ابحث..." oninput="renderGradeStudents()"></div>
+          <div class="field"><label>الطالب</label><select id="gradeStudent" class="select"></select></div>
+          <div class="grid2">
+            <div class="field"><label>المادة</label><div id="subject" class="subjectFixed"><span>العلوم</span><small>مادة المعلم</small></div></div>
+            <div class="field"><label>اسم التسميع / الاختبار</label><input id="assessment" class="input" placeholder="اسم التقييم"></div>
+            <div class="field">
+              <label>الدرجة</label>
+              <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+                <input id="score" class="input" type="number" min="0" step="0.5" placeholder="الدرجة">
+                <input id="scoreMax" class="input" type="number" min="1" step="1" value="10" placeholder="من">
+              </div>
+              <div class="muted" style="margin-top:7px">مثال: 8 من 10 أو 17 من 20.</div>
+            </div>
+          </div>
+          <div class="field"><label>ملاحظة المعلم</label><textarea id="teacherNote" class="textarea" placeholder="ملاحظة اختيارية"></textarea></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn gold" onclick="addGrade()">حفظ الدرجة</button><button type="button" class="btn danger" onclick="markAbsent()">غائب</button></div>
+        </div>
+      </div>
+
+      <div id="batchTab" class="teacherTab hidden">
+        <div class="card">
+          <div class="sectionHead"><div><h2>تسميع جماعي</h2><div class="muted">أضف تسميعاً واحداً لجميع طلاب صف معين</div></div></div>
+          <div class="field"><label>الصف الدراسي</label><select id="batchLevel" class="select" onchange="populateGroupDropdowns()"></select></div>
+          <div class="field"><label>المجموعة</label><select id="batchGroup" class="select"><option value="">جميع المجموعات</option></select></div>
+          <div class="field"><label>اسم التسميع / الاختبار</label><input id="batchAssessment" class="input" placeholder="اسم التقييم"></div>
+          <div class="field"><label>الدرجة القصوى</label><input id="batchMaxScore" class="input" type="number" min="1" step="1" value="10"></div>
+          <button type="button" class="btn gold" onclick="prepareBatchGrades()">تجهيز التسميع الجماعي</button>
+          <div id="batchContainer" style="margin-top:15px"></div>
+          <button type="button" class="btn gold" onclick="saveBatchGrades()" style="margin-top:15px;width:100%;display:none" id="batchSaveAllBtn">حفظ جميع الدرجات دفعة واحدة</button>
+        </div>
+      </div>
+
+      <div id="messagesTab" class="teacherTab hidden">
+        <div class="card">
+          <div class="sectionHead"><div><h2>المحادثات</h2><div class="muted">التواصل مع أولياء الأمور</div></div></div>
+          <div class="searchTools">
+            <select id="chatLevelFilter" class="select" onchange="renderChatList()"><option value="">جميع الصفوف</option></select>
+            <select id="chatGroupFilter" class="select" onchange="renderChatList()"><option value="">جميع المجموعات</option></select>
+            <input id="chatSearch" class="input" placeholder="ابحث باسم الطالب" oninput="renderChatList()">
+          </div>
+          <div id="chatList"></div>
+          <div id="chatBox" class="hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap"><h3 id="chatStudentName" style="margin:0"></h3><button type="button" class="btn soft" onclick="closeChat()">✕ إغلاق</button></div>
+            <div id="chatConversation" class="conversation"></div>
+            <div class="chatIn" id="tWrap"><input id="chatMessageInput" class="input" placeholder="اكتب رسالة..." style="flex:1"><button type="button" class="mic" id="tMic" onclick="togV('t')">🎤</button><button type="button" class="btn gold" id="tSend" onclick="sendTeacherMessage()">إرسال</button><div id="tRec" class="recBox hidden"><span class="dot"></span><span id="tT">00:00</span><span style="font-size:11px;color:#aaa">جاري التسجيل...</span><button type="button" onclick="cV('t')" style="margin-right:auto;border:0;background:0;color:#ff7b86;cursor:pointer">✕</button><button type="button" class="btn gold" style="padding:6px 10px" onclick="sV('t')">✓</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reportsTab" class="teacherTab hidden">
+        <div class="card">
+          <div class="sectionHead"><div><h2>📊 التقرير الشهري</h2><div class="muted">عرض ترتيب الطلاب حسب الدرجات</div></div></div>
+          <div class="field"><label>الصف الدراسي</label><select id="reportLevel" class="select"><option value="">جميع الصفوف</option></select></div>
+          <div class="field"><label>المجموعة</label><select id="reportGroup" class="select"><option value="">جميع المجموعات</option></select></div>
+          <div class="field"><label>الشهر</label><select id="reportMonth" class="select"><option value="all">كل الفترة</option></select></div>
+          <button type="button" class="btn gold" onclick="generateReport()">عرض التقرير</button>
+          <div id="reportResult" style="margin-top:15px"></div>
+        </div>
+      </div>
+
+      <div id="groupsTab" class="teacherTab hidden">
+        <div class="card">
+          <div class="sectionHead"><div><h2>📋 إدارة المجموعات</h2><div class="muted">إنشاء مجموعات للصفوف</div></div></div>
+          <div class="field"><label>الصف الدراسي</label><select id="groupLevel" class="select"></select></div>
+          <div class="field"><label>اسم المجموعة (مثال: مجموعة أ - الأحد 10ص)</label><input id="groupName" class="input" placeholder="اكتب اسم المجموعة"></div>
+          <button type="button" class="btn gold" onclick="addGroup()">➕ إضافة مجموعة</button>
+          <div id="groupList" style="margin-top:15px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="loginModal" class="modal hidden">
+  <div class="modalBox">
+    <div class="modalHead"><h2>دخول المعلم</h2><button type="button" class="close" onclick="closeModal('loginModal')">×</button></div>
+    <p class="muted">أدخل الكود السري</p>
+    <input id="loginCode" class="input" type="password" placeholder="الكود السري" style="margin:12px 0">
+    <button type="button" class="btn gold" onclick="login()">دخول</button><div id="loginError"></div>
+  </div>
+</div>
+
+<div id="studentModal" class="modal hidden">
+  <div class="modalBox">
+    <div class="modalHead"><h2 id="studentTitle">إضافة طالب</h2><button type="button" class="close" onclick="closeModal('studentModal')">×</button></div>
+    <div class="field"><label>اسم الطالب</label><input id="name" class="input"></div>
+    <div class="field"><label>كود الطالب</label><input id="code" class="input"></div>
+    <div class="field"><label>الصف الدراسي</label><select id="gradeLevel" class="select"></select></div>
+    <div class="field"><label>المجموعة</label><select id="studentGroup" class="select"></select></div>
+    <button type="button" class="btn gold" onclick="saveStudent()">حفظ</button><div id="studentError"></div>
+  </div>
+</div>
+
+<div id="detailsModal" class="modal hidden">
+  <div class="modalBox"><div class="modalHead"><h2 id="detailsTitle">الطالب</h2><button type="button" class="close" onclick="closeModal('detailsModal')">×</button></div><div id="details"></div></div>
+</div>
+
+<div id="gradeEditModal" class="modal hidden">
+  <div class="modalBox">
+    <div class="modalHead"><h2>تعديل الدرجة</h2><button type="button" class="close" onclick="closeModal('gradeEditModal')">×</button></div>
+    <input type="hidden" id="editGradeStudentId"><input type="hidden" id="editGradeId">
+    <div class="field"><label>الدرجة</label><input id="editScore" class="input" type="number" step="0.5"></div>
+    <div class="field"><label>الدرجة القصوى</label><input id="editMaxScore" class="input" type="number" step="1"></div>
+    <div class="field"><label>ملاحظة</label><textarea id="editNote" class="textarea"></textarea></div>
+    <div style="display:flex;gap:10px"><button type="button" class="btn gold" onclick="saveGradeEdit()">حفظ التعديل</button><button type="button" class="btn danger" onclick="deleteGradeFromEdit()">حذف</button></div>
+    <div id="editError"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const PARENT_SESSION_KEY="parent_session_code";
+const TEACHER_SESSION_KEY="teacher_session_active";
+const TEACHER_CODE="777";
+let editId=null;
+let db={students:[],conversations:{},customGroups:[]};
+let currentChatStudentId=null;
+let parentLoggedInCode=null;
+let customGroups=[];
+let currentReportResults=[];
+let firebaseReady=false;
+let applyingRemote=false;
+let lastKnownRemoteStudentsCount=0;
+let isReadOnlyDueToLoadFail=true;
+let isOnline=navigator.onLine;
+
+const firebaseConfig={
+  apiKey:"AIzaSyCnD0l2VPefFM5oNW0nr9qULLGiHfNtH8s",
+  authDomain:"studentapp-c78a8.firebaseapp.com",
+  projectId:"studentapp-c78a8",
+  storageBucket:"studentapp-c78a8.firebasestorage.app",
+  messagingSenderId:"487123256369",
+  appId:"1:487123256369:web:edaa8f475239407850c110"
+};
+firebase.initializeApp(firebaseConfig);
+const fdb=firebase.firestore();
+const dataRef=fdb.collection("appData").doc("main");
+const studentsCol=fdb.collection("students_v2");
+const backupsCol=fdb.collection("backups");
+
+const levels=[
+  "الصف الأول الإعدادي",
+  "الصف الثاني الإعدادي",
+  "الصف الثالث الإعدادي",
+  "الصف الأول الثانوي"
+];
+
+function load(){return db}
+
+function setDbStatus(state,msg){ return; }
+
+function checkOnlineStatus(){
+  isOnline=navigator.onLine;
+  const blocker=document.getElementById("offlineBlocker");
+  if(!isOnline){ blocker.classList.add("show"); }
+  else { blocker.classList.remove("show"); if(!firebaseReady) initFirebaseListener(); }
+  return isOnline;
+}
+window.checkOnlineStatus=checkOnlineStatus;
+window.addEventListener('online', checkOnlineStatus);
+window.addEventListener('offline', ()=>{ isOnline=false; document.getElementById("offlineBlocker").classList.add("show"); });
+
+function enterReadOnlyMode(reason){ isReadOnlyDueToLoadFail=true; firebaseReady=false; }
+function exitReadOnlyMode(){ isReadOnlyDueToLoadFail=false; firebaseReady=true; }
+
+async function saveBackupIfNeeded(isBulkDelete=false){
+  try{
+    if(!db.students||!db.students.length) return;
+    const backup={ timestamp: firebase.firestore.FieldValue.serverTimestamp(), localTime: new Date().toISOString(), studentsCount: db.students.length, data: JSON.parse(JSON.stringify(db)), reason: isBulkDelete? "before_bulk_delete":"auto" };
+    await backupsCol.doc("latest").set(backup);
+    if(isBulkDelete) await backupsCol.add(backup);
+  }catch(e){}
+}
+
+function save(options={}){
+  return new Promise(async (resolve,reject)=>{
+    if(applyingRemote){ resolve(false); return; }
+    if(isReadOnlyDueToLoadFail || !firebaseReady){ toast("❌ القراءة فشلت - وضع قراءة فقط"); reject(new Error("read-only")); return; }
+    if(!navigator.onLine){ document.getElementById("offlineBlocker").classList.add("show"); reject(new Error("offline")); return; }
+    if(lastKnownRemoteStudentsCount>0 && (!db.students||db.students.length===0) && !options.allowEmpty){
+      console.error("منع مسح كارثي"); reject(new Error("would wipe")); return;
+    }
+    db.customGroups=customGroups;
+    const payload={ students:JSON.parse(JSON.stringify(db.students||[])), conversations:JSON.parse(JSON.stringify(db.conversations||{})), customGroups:JSON.parse(JSON.stringify(customGroups||[])), lastUpdate: firebase.firestore.FieldValue.serverTimestamp() };
+    try{
+      await dataRef.set(payload, {merge:false});
+      if(options.singleStudent){ const s=options.singleStudent; await studentsCol.doc(String(s.id||s.code)).set(s,{merge:true}); }
+      lastKnownRemoteStudentsCount=db.students.length;
+      resolve(true);
+    }catch(err){
+      console.error(err); toast("❌ الحفظ فشل - الطالب مش متسجل"); reject(err);
+    }
+  });
+}
+
+function applyRemoteData(data){
+  applyingRemote=true;
+  const incomingStudents=data.students||[];
+  if(lastKnownRemoteStudentsCount>0 && incomingStudents.length===0){
+    console.warn("تجاهل بيانات فارغة حماية"); applyingRemote=false; return;
+  }
+  db.students=incomingStudents;
+  db.conversations=data.conversations||{};
+  customGroups=data.customGroups||[];
+  db.customGroups=customGroups;
+  lastKnownRemoteStudentsCount=db.students.length;
+  applyingRemote=false;
+  exitReadOnlyMode();
+  document.getElementById("offlineBlocker")?.classList.remove("show");
+  refreshUIFromRemote();
+}
+
+let refreshTimer=null;
+let lastConvLen=0;
+function refreshUIFromRemote(){
+  if(refreshTimer) return;
+  refreshTimer=setTimeout(()=>{
+    refreshTimer=null;
+    const teacherOpen=!document.getElementById("teacherPage")?.classList.contains("hidden");
+    const chatOpen=!document.getElementById("chatBox")?.classList.contains("hidden");
+    if(teacherOpen){
+      if(chatOpen&&currentChatStudentId){
+        if(typeof renderConversation==='function') renderConversation(currentChatStudentId);
+        if(typeof renderChatList==='function') renderChatList();
+        const cl=document.getElementById("chatList"); if(cl) cl.style.display="none";
+      }else{
+        if(typeof renderAll==='function') renderAll();
+      }
+    }
+    const parentConvEl=document.getElementById("parentConversation");
+    if(parentConvEl && parentLoggedInCode){
+      const sid=db.students.find(x=>x.code===parentLoggedInCode)?.id;
+      if(sid){
+        const conv=db.conversations[sid]||[];
+        if(conv.length!==lastConvLen){
+          lastConvLen=conv.length;
+          const isNearBottom = parentConvEl.scrollTop + parentConvEl.clientHeight >= parentConvEl.scrollHeight - 80;
+          if(typeof renderParentConversationSilent==='function') renderParentConversationSilent(sid);
+          else if(typeof renderParentConversation==='function') renderParentConversation(sid);
+          if(isNearBottom) parentConvEl.scrollTop=parentConvEl.scrollHeight;
+        }
+      }
+    }
+  },500);
+}
+
+let unsubscribe=null;
+function initFirebaseListener(){
+  if(!navigator.onLine){ checkOnlineStatus(); return; }
+  try{
+    if(unsubscribe) unsubscribe();
+    unsubscribe = dataRef.onSnapshot(doc=>{
+      if(!doc.exists){ firebaseReady=true; isReadOnlyDueToLoadFail=false; lastKnownRemoteStudentsCount=0; document.getElementById("offlineBlocker")?.classList.remove("show"); return; }
+      applyRemoteData(doc.data());
+    }, err=>{ console.error(err); enterReadOnlyMode(err.code); if(!navigator.onLine) document.getElementById("offlineBlocker")?.classList.add("show"); });
+  }catch(e){ enterReadOnlyMode(e.message); }
+}
+window.addEventListener('DOMContentLoaded', ()=>{ checkOnlineStatus(); initFirebaseListener(); });
+
+// حفظ حالة المعلم - نفس فكرة ولي الأمر
+(function autoRestoreTeacher(){
+  try{
+    const t = localStorage.getItem(TEACHER_SESSION_KEY) || localStorage.getItem('teacherLogged');
+    const p = localStorage.getItem(PARENT_SESSION_KEY);
+    if(t==='true' && !p){
+      // المعلم كان مسجل قبل كده على نفس الجهاز - ارجعه تلقائي
+      setTimeout(()=>{
+        document.getElementById("parentPage")?.classList.add("hidden");
+        document.getElementById("teacherPage")?.classList.remove("hidden");
+        document.querySelector(".teacherBtn")?.classList.add("hidden");
+        if(typeof renderAll==='function') renderAll();
+      }, 300);
+    }
+  }catch(e){}
+})();
+
+
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function closeModal(id){document.getElementById(id).classList.add("hidden")}
+function toast(t){const x=document.getElementById("toast");x.textContent=t;x.classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>x.classList.remove("show"),2500)}
+function normalizeArabic(v){
+  return String(v||"").trim().toLowerCase().normalize("NFKC")
+    .replace(/[ًٌٍَُِّْـ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي")
+    .replace(/[ؤئ]/g,"ء").replace(/[ةه]/g,"ه").replace(/\s+/g," ");
+}
+function studentMatches(s,query){
+  const q=normalizeArabic(query);
+  if(!q)return true;
+  const fullName=normalizeArabic(s.name);
+  return fullName.includes(q)||String(s.code||"").toLowerCase().includes(q);
+}
+function avg(s){
+  const grades=s.grades.filter(g=>!g.absent);
+  if(!grades.length)return 0;
+  const total=grades.reduce((a,g)=>a+(Number(g.score)||0)/(Number(g.maxScore)||100)*100,0);
+  return Math.round(total/grades.length);
+}
+function avatar(n){return(n||"ط").trim().slice(0,1)}
+function scoreClass(v){return v>=80?"good":v>=60?"mid":"low"}
+function formatGrade(g){return g.absent?"غائب":`${g.score}/${g.maxScore}`}
+
+function populateLevels(selectId){
+  const sel=document.getElementById(selectId);if(!sel)return;
+  sel.innerHTML=levels.map(x=>`<option value="${x}">${x}</option>`).join("");
+}
+function populateGroupDropdowns(){
+  const ids=["studentGroup","batchGroup","gradeFilterGroup","studentGroupFilter","chatGroupFilter","reportGroup"];
+  ids.forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const currentVal=sel.value;
+    const placeholder = (id==="studentGroup") ? "بدون مجموعة" : "جميع المجموعات";
+    sel.innerHTML=`<option value="">${placeholder}</option>`;
+    let level="";
+    if(id==="studentGroup")level=document.getElementById("gradeLevel")?.value||"";
+    if(id==="batchGroup")level=document.getElementById("batchLevel")?.value||"";
+    const groups=getGroupsForLevel(level);
+    groups.forEach(g=>sel.innerHTML+=`<option value="${g}">${g}</option>`);
+    if(currentVal)sel.value=currentVal;
+  });
+}
+function getGroupsForLevel(level){
+  if(!level)return customGroups.map(g=>g.name);
+  return customGroups.filter(g=>g.level===level).map(g=>g.name);
+}
+
+populateLevels("gradeLevel");
+populateLevels("batchLevel");
+populateLevels("groupLevel");
+populateLevels("reportLevel");
+["gradeFilterLevel","studentLevelFilter","chatLevelFilter","reportLevel"].forEach(id=>{
+  const sel=document.getElementById(id);
+  if(sel)sel.innerHTML='<option value="">جميع الصفوف</option>'+levels.map(x=>`<option value="${x}">${x}</option>`).join("");
+});
+const monthSelect=document.getElementById("reportMonth");
+if(monthSelect){
+  monthSelect.innerHTML='<option value="all">كل الفترة</option>';
+  const months=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  months.forEach((m,i)=>monthSelect.innerHTML+=`<option value="${i+1}">${m}</option>`);
+}
+
+function openLogin(){
+  document.getElementById("loginCode").value="";
+  document.getElementById("loginError").innerHTML="";
+  document.getElementById("loginModal").classList.remove("hidden");
+  setTimeout(()=>document.getElementById("loginCode").focus(),50);
+}
+function login(){
+  if(document.getElementById("loginCode").value===TEACHER_CODE){
+    closeModal("loginModal");
+    document.getElementById("parentPage").classList.add("hidden");
+    document.getElementById("teacherPage").classList.remove("hidden");
+    document.querySelector(".teacherBtn").classList.add("hidden");
+    try{ localStorage.setItem(TEACHER_SESSION_KEY, "true"); localStorage.setItem("teacherLogged","true"); }catch(e){}
+    renderAll();
+  }else document.getElementById("loginError").innerHTML='<div class="message error">الكود غير صحيح.</div>';
+}
+function logout(){
+  // مسح جلسة المعلم
+  try{ localStorage.removeItem(TEACHER_SESSION_KEY); localStorage.removeItem('teacherLogged'); }catch(e){}
+  document.getElementById("teacherPage").classList.add("hidden");
+  document.getElementById("parentPage").classList.remove("hidden");
+  document.getElementById("parentResult").innerHTML="";
+  parentLoggedInCode=null;
+  document.querySelector(".teacherBtn").classList.remove("hidden");
+  document.getElementById("parentHero").classList.remove("hidden");
+  document.getElementById("parentSearchBox").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function tab(name,btn){
+  document.querySelectorAll(".teacherTab").forEach(x=>x.classList.add("hidden"));
+  document.getElementById(name+"Tab").classList.remove("hidden");
+  document.querySelectorAll(".sidebar button[data-tab]").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+  if(name==="students"){populateGroupDropdowns();renderStudents()}
+  if(name==="grades"){populateGroupDropdowns();renderGradeStudents()}
+  if(name==="batch"){populateGroupDropdowns()}
+  if(name==="messages"){populateGroupDropdowns();renderChatList()}
+  if(name==="reports"){populateGroupDropdowns()}
+  if(name==="groups"){populateGroupDropdowns();renderGroups()}
+}
+function renderAll(){populateGroupDropdowns();renderStudents();renderGradeStudents();renderChatList();renderGroups()}
+
+function openStudent(){
+  if(!firebaseReady){toast("استنى لحد ما البيانات تحمّل");return}
+  editId=null;
+  document.getElementById("studentTitle").textContent="إضافة طالب";
+  document.getElementById("name").value="";
+  document.getElementById("code").value="";
+  document.getElementById("gradeLevel").selectedIndex=0;
+  populateGroupDropdowns();
+  document.getElementById("studentGroup").selectedIndex=0;
+  document.getElementById("studentError").innerHTML="";
+  document.getElementById("studentModal").classList.remove("hidden");
+}
+function editStudent(id){
+  const s=db.students.find(x=>x.id===id);if(!s)return;
+  editId=id;
+  document.getElementById("studentTitle").textContent="تعديل الطالب";
+  document.getElementById("name").value=s.name;
+  document.getElementById("code").value=s.code;
+  document.getElementById("gradeLevel").value=s.level;
+  populateGroupDropdowns();
+  document.getElementById("studentGroup").value=s.group||"";
+  document.getElementById("studentError").innerHTML="";
+  document.getElementById("studentModal").classList.remove("hidden");
+}
+function saveStudent(){
+  const name=document.getElementById("name").value.trim();
+  const code=document.getElementById("code").value.trim();
+  const level=document.getElementById("gradeLevel").value;
+  const group=document.getElementById("studentGroup").value;
+  if(!name||!code){document.getElementById("studentError").innerHTML='<div class="message error">أكمل اسم الطالب والكود.</div>';return}
+  if(db.students.some(s=>s.code===code&&s.id!==editId)){document.getElementById("studentError").innerHTML='<div class="message error">الكود مستخدم بالفعل.</div>';return}
+  if(editId){
+    const s=db.students.find(x=>x.id===editId);s.name=name;s.code=code;s.level=level;s.group=group;
+  }else{
+    const now=new Date();
+    const newStudent={id:"s"+Date.now(),name,code,level,group:group||"",grades:[],addedDate:now.toLocaleDateString("ar-EG"),addedTimestamp:now.getTime()};
+  db.students.push(newStudent);
+  }
+  save({singleStudent: newStudent}).then(()=>{ toast("✅ تم الحفظ"); }).catch(err=>{ db.students=db.students.filter(x=>x.code!==code); if(typeof renderAll==='function') renderAll(); toast("❌ الحفظ فشل"); });;closeModal("studentModal");renderAll();toast(editId?"تم تعديل الطالب":"تم إضافة الطالب");
+}
+function deleteStudent(id){
+  const s=db.students.find(x=>x.id===id);if(!s)return;
+  if(!confirm("هل تريد حذف الطالب وكل درجاته ومحادثاته؟"))return;
+  delete db.conversations[id];db.students=db.students.filter(x=>x.id!==id);save();renderAll();toast("تم حذف الطالب");
+}
+function renderStudents(){
+  const levelFilter=document.getElementById("studentLevelFilter")?.value||"";
+  const groupFilter=document.getElementById("studentGroupFilter")?.value||"";
+  const q=(document.getElementById("studentSearch")?.value||"").trim().toLowerCase();
+  let list=db.students.filter(s=>studentMatches(s,q));
+  if(levelFilter)list=list.filter(s=>s.level===levelFilter);
+  if(groupFilter)list=list.filter(s=>s.group===groupFilter);
+  // Sort: unread first
+  list.sort((a,b)=>{
+    const ua=getUnreadCount(a.id), ub=getUnreadCount(b.id);
+    if(ua>0 && ub===0) return -1;
+    if(ub>0 && ua===0) return 1;
+    const ca=db.conversations[a.id]||[], cb=db.conversations[b.id]||[];
+    const ta=ca.length?ca[ca.length-1].timestamp:0;
+    const tb=cb.length?cb[cb.length-1].timestamp:0;
+    return tb-ta;
+  });
+  const el=document.getElementById("studentsList");
+  if(!list.length){el.innerHTML='<div class="empty">لا يوجد طلاب مطابقون للبحث.</div>';return}
+  el.innerHTML=list.map(s=>{
+    const checked = (typeof selectedForDelete!=='undefined' && selectedForDelete.has(s.id)) ? 'checked' : '';
+    const showCheck = (typeof bulkDeleteMode!=='undefined' && bulkDeleteMode) ? `<input type="checkbox" class="bulkCheck" style="width:20px;height:20px;accent-color:#d7ad55;margin-left:10px" ${checked} onchange="toggleStudentSelect('${s.id}')" onclick="event.stopPropagation()">` : '';
+    return `<div class="student" data-id="${s.id}" style="position:relative;${(typeof bulkDeleteMode!=='undefined' && bulkDeleteMode)?'padding-right:40px':''}">
+      ${showCheck}
+      <div class="studentTop"><div class="avatar">${esc(avatar(s.name))}</div><div>
+      <h3>${esc(s.name)}</h3>
+      <p>${esc(s.level)} ${s.group?`<span class="group-tag">${esc(s.group)}</span>`:""}</p>
+      ${s.addedDate?`<div class="muted" style="font-size:10px">🕒 ${esc(s.addedDate)}</div>`:""}</div></div>
+      <span class="badge">كود ${esc(s.code)}</span>
+      <div class="muted" style="margin-bottom:13px">التقييمات: <b>${s.grades.length}</b> • المتوسط: <b>${avg(s)}%</b></div>
+      <div class="actions"><button type="button" class="btn soft" onclick="details('${s.id}')">عرض</button><button type="button" class="btn soft" onclick="editStudent('${s.id}')">تعديل</button><button type="button" class="btn danger" onclick="deleteStudent('${s.id}')">حذف</button><button type="button" class="btn gold" onclick="openChat('${s.id}')">المحادثة</button></div>
+    </div>`;
+  }).join("");
+}
+function renderGradeStudents(){
+  const levelFilter=document.getElementById("gradeFilterLevel").value;
+  const groupFilter=document.getElementById("gradeFilterGroup").value;
+  const q=(document.getElementById("gradeStudentSearch")?.value||"").trim().toLowerCase();
+  let list=db.students.filter(s=>studentMatches(s,q));
+  if(levelFilter)list=list.filter(s=>s.level===levelFilter);
+  if(groupFilter)list=list.filter(s=>s.group===groupFilter);
+  document.getElementById("gradeStudent").innerHTML=list.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.code)}</option>`).join("")||'<option value="">لا يوجد طالب</option>';
+}
+
+function addGrade(){
+  const sid=document.getElementById("gradeStudent").value;
+  const assessment=document.getElementById("assessment").value.trim();
+  const score=Number(document.getElementById("score").value);
+  const maxScore=Number(document.getElementById("scoreMax").value);
+  const note=document.getElementById("teacherNote").value.trim();
+  const s=db.students.find(x=>x.id===sid);
+  if(!s){toast("اختر طالبًا أولًا");return}
+  if(!assessment){toast("اكتب اسم التسميع أو الاختبار");return}
+  if(!Number.isFinite(score)||!Number.isFinite(maxScore)||maxScore<=0||score<0||score>maxScore){toast("تأكد أن الدرجة صحيحة");return}
+  s.grades.push({id:"g"+Date.now()+Math.random().toString(36).slice(2,7),subject:"العلوم",assessment,score,maxScore,note,absent:false,date:new Date().toLocaleDateString("ar-EG"),timestamp:Date.now()});
+  let gradeMsg=`الطالب اختبر «${assessment}» ودرجته ${score} من ${maxScore}.`;
+  if(note) gradeMsg+=`\nملحوظة من المعلم: ${note}`;
+  addConversationMessage(s.id,"teacher",gradeMsg);
+  save();document.getElementById("assessment").value="";document.getElementById("score").value="";document.getElementById("scoreMax").value="10";document.getElementById("teacherNote").value="";
+  renderAll();toast("تم حفظ الدرجة");
+}
+function markAbsent(){
+  const sid=document.getElementById("gradeStudent").value;
+  const assessment=document.getElementById("assessment").value.trim();
+  const s=db.students.find(x=>x.id===sid);
+  if(!s){toast("اختر طالبًا أولًا");return}
+  if(!assessment){toast("اكتب اسم التسميع أو الاختبار");return}
+  const maxScore=Number(document.getElementById("scoreMax").value);
+  if(!Number.isFinite(maxScore)||maxScore<=0){toast("أدخل الدرجة القصوى للاختبار أولاً");return}
+  s.grades.push({id:"g"+Date.now()+Math.random().toString(36).slice(2,7),subject:"العلوم",assessment,score:0,maxScore,note:"",absent:true,date:new Date().toLocaleDateString("ar-EG"),timestamp:Date.now()});
+  addConversationMessage(s.id,"teacher",`الطالب لم يحضر اختبار «${assessment}» (من ${maxScore}).`,"");
+  save();document.getElementById("assessment").value="";document.getElementById("score").value="";document.getElementById("scoreMax").value="10";document.getElementById("teacherNote").value="";
+  renderAll();toast(`تم تسجيل غياب ${s.name}`);
+}
+
+function details(id){
+  const s=db.students.find(x=>x.id===id);if(!s)return;
+  document.getElementById("detailsTitle").textContent=s.name;
+  const sorted=s.grades.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  document.getElementById("details").innerHTML=`<div class="stats">
+    <div class="stat"><small>الصف</small><strong style="font-size:16px">${esc(s.level)}</strong></div>
+    <div class="stat"><small>المجموعة</small><strong style="font-size:16px">${esc(s.group)||"بدون"}</strong></div>
+    <div class="stat"><small>التقييمات</small><strong>${s.grades.length}</strong></div>
+    <div class="stat"><small>المتوسط</small><strong>${avg(s)}%</strong></div>
+    ${s.addedDate?`<div class="stat"><small>تاريخ الإضافة</small><strong style="font-size:14px">${esc(s.addedDate)}</strong></div>`:""}
+  </div>
+  ${s.grades.length?`<div class="tableWrap"><table class="table"><thead><tr><th>التقييم</th><th>المادة</th><th>الدرجة</th><th>الملاحظة</th><th></th></tr></thead><tbody>${sorted.map(g=>`<tr><td>${esc(g.assessment)}</td><td>${esc(g.subject)}</td><td class="score ${g.absent?"low":scoreClass(g.score)}">${g.absent?"غائب":formatGrade(g)}</td><td>${g.note?`<div class="note">${esc(g.note)}</div>`:"—"}${g.parentNote?`<div class="parentNote">${esc(g.parentNote)}</div>`:""}</td><td><button type="button" class="btn soft" style="padding:5px 8px;font-size:10px" onclick="openEditGrade('${s.id}','${g.id}')">✏️</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">لا توجد درجات.</div>'}`;
+  document.getElementById("detailsModal").classList.remove("hidden");
+}
+function openEditGrade(sid,gid){
+  const s=db.students.find(x=>x.id===sid);if(!s)return;
+  const g=s.grades.find(x=>x.id===gid);if(!g)return;
+  document.getElementById("editGradeStudentId").value=sid;document.getElementById("editGradeId").value=gid;
+  document.getElementById("editScore").value=g.score;document.getElementById("editMaxScore").value=g.maxScore;document.getElementById("editNote").value=g.note||"";
+  document.getElementById("editError").innerHTML="";document.getElementById("gradeEditModal").classList.remove("hidden");
+}
+function saveGradeEdit(){
+  const sid=document.getElementById("editGradeStudentId").value,gid=document.getElementById("editGradeId").value;
+  const score=Number(document.getElementById("editScore").value),maxScore=Number(document.getElementById("editMaxScore").value),note=document.getElementById("editNote").value.trim();
+  const s=db.students.find(x=>x.id===sid);if(!s){toast("خطأ");return}
+  const g=s.grades.find(x=>x.id===gid);if(!g){toast("خطأ");return}
+  if(!Number.isFinite(score)||!Number.isFinite(maxScore)||maxScore<=0||score<0||score>maxScore){document.getElementById("editError").innerHTML='<div class="message error">تأكد من صحة الدرجة</div>';return}
+  const oldGrade=g.absent?`غائب (من ${g.maxScore||maxScore})`:`${g.score}/${g.maxScore}`,newGrade=`${score}/${maxScore}`;
+  g.score=score;g.maxScore=maxScore;g.note=note;g.absent=false;
+  let editMsg=`تم تعديل اختبار «${g.assessment}» من درجة ${oldGrade} إلى درجة ${newGrade}.`;
+  if(note) editMsg+=`\nملحوظة من المعلم: ${note}`;
+  addConversationMessage(s.id,"teacher",editMsg);
+  save();closeModal("gradeEditModal");renderAll();
+  if(!document.getElementById("detailsModal").classList.contains("hidden")) details(sid);
+  toast("تم تعديل الدرجة");
+}
+function deleteGradeFromEdit(){
+  const sid=document.getElementById("editGradeStudentId").value,gid=document.getElementById("editGradeId").value;
+  if(!confirm("حذف هذه الدرجة؟"))return;
+  const s=db.students.find(x=>x.id===sid);if(!s)return;
+  s.grades=s.grades.filter(g=>g.id!==gid);save();closeModal("gradeEditModal");renderAll();toast("تم حذف الدرجة");
+}
+
+function enterParentSession(code){
+  const s=db.students.find(x=>x.code===code);
+  if(!s)return false;
+  parentLoggedInCode=code;
+  try{localStorage.setItem(PARENT_SESSION_KEY,code)}catch(e){}
+  document.getElementById("parentHero").classList.add("hidden");
+  document.getElementById("parentSearchBox").classList.add("hidden");
+  document.querySelector(".teacherBtn").classList.add("hidden");
+  const box=document.getElementById("parentResult");
+  const sorted=s.grades.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  const unreadCount=getParentUnreadCount(s.id);
+  box.innerHTML=`<div class="card"><div class="sectionHead"><div><h2>${esc(s.name)} ${unreadCount>0?`<span class="unread-badge">${unreadCount}</span>`:""}</h2><div class="muted">${esc(s.level)} ${s.group?`• ${esc(s.group)}`:""} • كود ${esc(s.code)}</div></div><div class="avatar">${esc(avatar(s.name))}</div></div>
+    <div style="text-align:left;margin-bottom:10px"><button type="button" class="parent-logout" onclick="parentLogout()">🚪 تسجيل خروج</button></div>
+    <div class="stats"><div class="stat"><small>متوسط الدرجات</small><strong>${avg(s)}%</strong></div><div class="stat"><small>عدد التقييمات</small><strong>${s.grades.length}</strong></div><div class="stat"><small>ملاحظات المعلم</small><strong>${s.grades.filter(g=>g.note).length}</strong></div></div>
+    ${s.grades.length?`<div class="tableWrap"><table class="table"><thead><tr><th>التقييم</th><th>المادة</th><th>الدرجة</th><th>التاريخ</th><th>ملاحظة</th></tr></thead><tbody>${sorted.map(g=>`<tr><td>${esc(g.assessment)}</td><td>${esc(g.subject)}</td><td class="score ${g.absent?"low":scoreClass(g.score)}">${g.absent?"غائب":formatGrade(g)}</td><td>${esc(g.date)}</td><td>${g.note?`<div class="note">${esc(g.note)}</div>`:"—"}${g.parentNote?`<div class="parentNote">ردك: ${esc(g.parentNote)}</div>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">لا توجد درجات مسجلة حتى الآن.</div>'}</div>
+  <div class="card" style="margin-top:18px"><h2 style="margin-top:0">💬 المحادثة</h2><div id="parentConversation" class="conversation"></div><div class="chatIn" id="pWrap"><input id="parentMessageInput" class="input" placeholder="اكتب رسالة..." style="flex:1"><button type="button" class="mic" id="pMic" onclick="togV('p')">🎤</button><button type="button" class="btn gold" id="pSend" onclick="sendParentMessage('${s.id}')">إرسال</button><div id="pRec" class="recBox hidden"><span class="dot"></span><span id="pT">00:00</span><span style="font-size:11px;color:#aaa">جاري التسجيل...</span><button type="button" onclick="cV('p')" style="margin-right:auto;border:0;background:0;color:#ff7b86;cursor:pointer">✕</button><button type="button" class="btn gold" style="padding:6px 10px" onclick="sV('p')">✓</button></div></div></div>`;
+  renderParentConversation(s.id);markParentMessagesRead(s.id);
+  return true;
+}
+function searchParent(){
+  const code=document.getElementById("parentCode").value.trim(),box=document.getElementById("parentResult");
+  if(!code){box.innerHTML='<div class="card"><div class="message error">أدخل كود الطالب.</div></div>';return}
+  if(!enterParentSession(code)){
+    box.innerHTML='<div class="card"><div class="message error">لم يتم العثور على الطالب.</div></div>';
+  }
+
+  return true;
+}
+
+function parentLogout(){
+  parentLoggedInCode=null;
+  try{localStorage.removeItem(PARENT_SESSION_KEY)}catch(e){}
+  document.getElementById("parentResult").innerHTML="";
+  document.getElementById("parentCode").value="";
+  document.getElementById("parentHero").classList.remove("hidden");
+  document.getElementById("parentSearchBox").classList.remove("hidden");
+  document.querySelector(".teacherBtn").classList.remove("hidden");
+  toast("تم تسجيل الخروج");
+}
+
+function sendParentMessage(sid){
+  const input=document.getElementById("parentMessageInput"),text=input.value.trim();
+  if(!text){toast("اكتب رسالة");return}
+  addConversationMessage(sid,"parent",text);input.value="";renderParentConversation(sid);input.focus();
+}
+function getParentUnreadCount(sid){const conv=db.conversations[sid]||[];return conv.filter(m=>m.sender==="teacher"&&!m.seen).length}
+function markParentMessagesRead(sid){
+  const conv=db.conversations[sid]||[];
+  let changed=false;
+  conv.forEach(m=>{if(m.sender==="teacher"&&!m.seen){m.seen=true;changed=true}});
+  if(changed)save();
+}
+
+function getUnreadCount(sid){const conv=db.conversations[sid]||[];return conv.filter(m=>m.sender==="parent"&&!m.seen).length}
+
+function openChat(sid){
+  const s=db.students.find(x=>x.id===sid);if(!s)return;
+  // افتح تبويب المحادثات أولاً وإلا تفتح المحادثة داخل تبويب مخفي
+  const msgBtn=document.querySelector(".sidebar button[data-tab='messages']");
+  if(msgBtn&&document.getElementById("messagesTab")?.classList.contains("hidden")) tab("messages",msgBtn);
+  currentChatStudentId=sid;document.getElementById("chatStudentName").textContent=s.name;
+  document.getElementById("chatBox").classList.remove("hidden");renderConversation(sid);markTeacherMessagesRead(sid);document.getElementById("chatList").style.display="none";
+}
+function closeChat(){document.getElementById("chatBox").classList.add("hidden");document.getElementById("chatList").style.display="block";renderChatList();currentChatStudentId=null}
+
+function markTeacherMessagesRead(sid){
+  const conv=db.conversations[sid]||[];
+  let changed=false;
+  conv.forEach(m=>{if(m.sender==="parent"&&!m.seen){m.seen=true;changed=true}});
+  if(changed)save();
+}
+function sendTeacherMessage(){
+  const input=document.getElementById("chatMessageInput"),text=input.value.trim();
+  if(!text||!currentChatStudentId){toast("اكتب رسالة");return}
+  addConversationMessage(currentChatStudentId,"teacher",text);input.value="";renderConversation(currentChatStudentId);input.focus();
+}
+function renderChatList(){
+  const levelFilter=document.getElementById("chatLevelFilter").value,groupFilter=document.getElementById("chatGroupFilter").value;
+  const q=(document.getElementById("chatSearch")?.value||"").trim().toLowerCase();
+  let list=db.students.filter(s=>studentMatches(s,q));
+  if(levelFilter)list=list.filter(s=>s.level===levelFilter);
+  if(groupFilter)list=list.filter(s=>s.group===groupFilter);
+  list=list.map(s=>{
+    const conv=db.conversations[s.id]||[];
+    const lastParentMsg=[...conv].reverse().find(m=>m.sender==='parent');
+    const lastParentTime=lastParentMsg ? (lastParentMsg.timestamp||0) : 0;
+    return {student:s, lastParentTime};
+  }).sort((a,b)=> b.lastParentTime - a.lastParentTime).map(x=>x.student);
+  const el=document.getElementById("chatList");if(!list.length){el.innerHTML='<div class="empty">لا يوجد طلاب.</div>';return}
+  let totalUnread=0;list.forEach(s=>{totalUnread+=getUnreadCount(s.id)});
+  document.getElementById("messageCount").innerHTML=totalUnread?`<span class="unread-badge">${totalUnread}</span>`:"";
+  el.innerHTML=list.map(s=>{
+    const unread=getUnreadCount(s.id);
+    const conv=db.conversations[s.id]||[];
+    const lastParentMsg=[...conv].reverse().find(m=>m.sender==='parent');
+    const lastMsg=lastParentMsg || conv.slice(-1)[0];
+    return `<div class="student" style="cursor:pointer;margin-bottom:8px" onclick="openChat('${s.id}')"><div class="studentTop"><div class="avatar">${esc(avatar(s.name))}</div><div style="flex:1">
+      <h3>${esc(s.name)} ${unread>0?`<span class="unread-badge">${unread}</span>`:""}</h3><p>${esc(s.level)} ${s.group?`• ${esc(s.group)}`:""}</p>
+      ${lastMsg?`<div class="muted" style="font-size:11px;margin-top:3px">${lastMsg.sender==='parent'?'👨‍👩‍👦: ':'🧑‍🏫: '}${esc(lastMsg.text|| (lastMsg.type==='audio'?'🎤 صوتية':'')).slice(0,50)}</div>`:"<div class='muted' style='font-size:11px'>لا توجد رسائل من ولي الأمر</div>"}</div></div></div>`;
+  }).join("");
+  if(document.getElementById("chatBox").classList.contains("hidden"))el.style.display="block";
+}
+
+function prepareBatchGrades(){
+  const level=document.getElementById("batchLevel").value,group=document.getElementById("batchGroup").value,assessment=document.getElementById("batchAssessment").value.trim(),maxScore=Number(document.getElementById("batchMaxScore").value);
+  if(!level){toast("اختر الصف أولاً");return}if(!assessment){toast("اكتب اسم التسميع");return}if(!Number.isFinite(maxScore)||maxScore<=0){toast("أدخل درجة قصوى صحيحة");return}
+  let students=db.students.filter(s=>s.level===level);if(group)students=students.filter(s=>s.group===group);
+  if(!students.length){toast("لا يوجد طلاب في هذا الصف/المجموعة");return}
+  document.getElementById("batchContainer").innerHTML=`<div class="message" style="margin-bottom:10px">التسميع: <strong>${esc(assessment)}</strong> — الدرجة القصوى: ${maxScore} — الصف: ${esc(level)}${group?` — المجموعة: ${esc(group)}`:""}</div>
+  <div class="batch-grade-grid">${students.map(s=>`<div class="student" style="margin:0;padding:12px"><div><strong>${esc(s.name)}</strong> <span class="muted">(${esc(s.code)})</span></div><div class="grade-row">
+  <div class="field"><label>الدرجة</label><input type="number" min="0" max="${maxScore}" step="0.5" class="input batch-score" data-sid="${s.id}" placeholder="0" style="padding:8px 10px"></div>
+  <div class="field"><label>ملاحظة</label><input type="text" class="input batch-note" data-sid="${s.id}" placeholder="اختياري" style="padding:8px 10px"></div>
+  <div class="field"><label style="color:#ff8792">غائب</label><input type="checkbox" class="batch-absent" data-sid="${s.id}" style="width:20px;height:20px;accent-color:#e35d6a;margin-top:5px"></div>
+  </div></div>`).join("")}</div>`;
+  document.getElementById("batchSaveAllBtn").style.display="block";toast("تم تجهيز الطلاب");
+}
+function saveBatchGrades(){
+  const container=document.getElementById("batchContainer"),assessment=document.getElementById("batchAssessment").value.trim(),maxScore=Number(document.getElementById("batchMaxScore").value),level=document.getElementById("batchLevel").value;
+  if(!assessment||!maxScore||!level){toast("بيانات التسميع غير مكتملة");return}
+  const scoreInputs=container.querySelectorAll(".batch-score");let saved=0,emptyFields=0;
+  scoreInputs.forEach(inp=>{const sid=inp.dataset.sid,score=inp.value.trim(),absentCheck=container.querySelector(`.batch-absent[data-sid="${sid}"]`),isAbsent=absentCheck?absentCheck.checked:false;if(!isAbsent&&score==="")emptyFields++});
+  if(emptyFields>0){toast(`⚠️ يوجد ${emptyFields} طالب لم تدخل لهم درجة. أكمل جميع الدرجات.`);return}
+  scoreInputs.forEach(inp=>{
+    const sid=inp.dataset.sid,score=Number(inp.value),noteInput=container.querySelector(`.batch-note[data-sid="${sid}"]`),absentCheck=container.querySelector(`.batch-absent[data-sid="${sid}"]`),isAbsent=absentCheck?absentCheck.checked:false,note=noteInput?noteInput.value.trim():"",s=db.students.find(x=>x.id===sid);
+    if(!s)return;
+    if(isAbsent){
+      s.grades.push({id:"g"+Date.now(),subject:"العلوم",assessment,score:0,maxScore,note:"",absent:true,date:new Date().toLocaleDateString("ar-EG"),timestamp:Date.now()});
+      addConversationMessage(s.id,"teacher",`الطالب لم يحضر اختبار «${assessment}» (من ${maxScore}).`,"");saved++;
+    }else if(!isNaN(score)&&score>=0&&score<=maxScore){
+      s.grades.push({id:"g"+Date.now(),subject:"العلوم",assessment,score,maxScore,note,absent:false,date:new Date().toLocaleDateString("ar-EG"),timestamp:Date.now()});
+      let gradeMsg=`الطالب اختبر «${assessment}» ودرجته ${score} من ${maxScore}.`;
+      if(note) gradeMsg+=`\nملحوظة من المعلم: ${note}`;
+      addConversationMessage(s.id,"teacher",gradeMsg);saved++;
+    }
+    inp.value="";if(noteInput)noteInput.value="";if(absentCheck)absentCheck.checked=false;
+  });
+  if(saved){save();toast(`تم حفظ ${saved} درجة`);renderAll();document.getElementById("batchSaveAllBtn").style.display="none";document.getElementById("batchContainer").innerHTML='<div class="message">✅ تم حفظ جميع الدرجات بنجاح</div>'}
+}
+
+function getReportResults(){
+  const level=document.getElementById("reportLevel").value,group=document.getElementById("reportGroup").value,month=document.getElementById("reportMonth").value;
+  let students=db.students;if(level)students=students.filter(s=>s.level===level);if(group)students=students.filter(s=>s.group===group);
+  const results=students.map(s=>{
+    let grades=s.grades.filter(g=>!g.absent && Number(g.maxScore)>0);
+    if(month!=="all"){
+      const now=new Date(),targetMonth=parseInt(month),targetYear=now.getFullYear();
+      grades=grades.filter(g=>{if(!g.timestamp)return false;const d=new Date(g.timestamp);return d.getMonth()===targetMonth-1&&d.getFullYear()===targetYear});
+    }
+    const total=grades.reduce((sum,g)=>sum+(g.score/g.maxScore)*100,0),avgScore=grades.length?Math.round(total/grades.length):0;
+    return {student:s,avgScore,gradeCount:grades.length};
+  });
+  results.sort((a,b)=>b.avgScore-a.avgScore);
+  return {results,level,group,month};
+}
+function generateReport(){
+  const {results,level,group,month}=getReportResults(),el=document.getElementById("reportResult");
+  currentReportResults=results;
+  if(!results.length){el.innerHTML='<div class="empty">لا يوجد طلاب</div>';return}
+  let html=`<div class="card"><div class="sectionHead"><div><h3>📊 التقرير${level?` - ${esc(level)}`:""}${group?` - ${esc(group)}`:""}${month!=="all"?` - الشهر ${esc(document.getElementById("reportMonth").selectedOptions[0]?.text||month)}`:""}</h3><div class="muted">ترتيب الطلاب حسب متوسط درجات التقييمات في الفترة المحددة.</div></div><button type="button" class="btn blue" onclick="sendMonthlyReportToParents()">📤 إرسال التقرير لأولياء الأمور</button></div><div style="margin-top:10px">`;
+  results.forEach((r,idx)=>{html+=`<div class="report-item"><span><span class="report-rank">#${idx+1}</span> ${esc(r.student.name)}</span><span>${r.avgScore}% (${r.gradeCount} تقييم)</span></div>`});
+  html+=`</div></div>`;el.innerHTML=html;
+}
+function sendMonthlyReportToParents(){
+  if(!currentReportResults.length){toast("اعرض التقرير أولاً");return}
+  const {month}=getReportResults();
+  const period=month==="all"?"الفترة المحددة":`شهر ${document.getElementById("reportMonth").selectedOptions[0]?.text||month}`;
+  const total=currentReportResults.length;
+  if(!confirm(`إرسال ترتيب ونسبة ${total} طالب إلى أولياء أمورهم؟`))return;
+  currentReportResults.forEach((r,idx)=>{
+    const msg=`التقرير الشهري - ${period}\nالطالب: ${r.student.name}\nالترتيب: ${idx+1} من ${total}\nالنسبة: ${r.avgScore}%.`;
+    addConversationMessage(r.student.id,"teacher",msg);
+  });
+  save();
+  toast(`تم إرسال التقرير لـ ${total} ولي أمر`);
+  renderChatList();
+}
+function addGroup(){
+  const level=document.getElementById("groupLevel").value,name=document.getElementById("groupName").value.trim();
+  if(!level){toast("اختر الصف أولاً");return}if(!name){toast("اكتب اسم المجموعة");return}
+  if(customGroups.some(g=>g.level===level&&g.name===name)){toast("هذه المجموعة موجودة بالفعل");return}
+  customGroups.push({level,name});save();document.getElementById("groupName").value="";renderGroups();populateGroupDropdowns();toast("تم إضافة المجموعة");
+}
+function renderGroups(){
+  const el=document.getElementById("groupList");if(!customGroups.length){el.innerHTML='<div class="empty">لا توجد مجموعات مضافة</div>';return}
+  let html='<div class="card"><h3>المجموعات المضافة</h3>';
+  customGroups.forEach((g,idx)=>{html+=`<div class="report-item"><span><strong>${esc(g.level)}</strong> → ${esc(g.name)}</span><button type="button" class="btn danger" style="padding:4px 10px;font-size:11px" onclick="deleteGroup(${idx})">✕</button></div>`});
+  html+="</div>";el.innerHTML=html;
+}
+function deleteGroup(idx){if(!confirm("حذف هذه المجموعة؟"))return;customGroups.splice(idx,1);save();renderGroups();populateGroupDropdowns();toast("تم حذف المجموعة")}
+function clearParentResult(){
+  parentLogout();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("parentCode").addEventListener("keydown",e=>{if(e.key==="Enter")searchParent()});
+document.getElementById("loginCode").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")document.querySelectorAll(".modal").forEach(x=>x.classList.add("hidden"));
+  if(e.key==="Enter" && e.target && e.target.id==="parentMessageInput"){
+    const sid=parentLoggedInCode && (db.students.find(x=>x.code===parentLoggedInCode)||{}).id;
+    if(sid){e.preventDefault();sendParentMessage(sid)}
+  }
+  if(e.key==="Enter" && e.target && e.target.id==="chatMessageInput"){
+    e.preventDefault();sendTeacherMessage();
+  }
+});
+
+
+// ===== Cloudinary Config =====
+const CLOUDINARY_CLOUD_NAME = "js6zufw2";
+const CLOUDINARY_UPLOAD_PRESET = "student_voice";
+// ==============================
+
+let mr=null,ch=[],rs=null,rt=null,rSt=0,tgt=null;
+let currentlyPlaying=null;
+
+function fT(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function addMsgCloud(sid,snd,txt,note="",ex={}){if(!db.conversations[sid])db.conversations[sid]=[];db.conversations[sid].push({sender:snd,text:txt||"",note:note||"",time:new Date().toLocaleString("ar-EG"),seen:false,timestamp:Date.now(),type:ex.type||'text',audio:ex.audio||null,duration:ex.duration||null,cloudUrl:ex.cloudUrl||null});save()}
+function addConversationMessage(sid,sender,text,note=""){if(!db.conversations[sid])db.conversations[sid]=[];db.conversations[sid].push({sender,text:text||"",note:note||"",time:new Date().toLocaleString("ar-EG"),seen:false,timestamp:Date.now(),type:'text'});save();}
+
+function generateWaveBars(){
+  let bars='';
+  for(let i=0;i<28;i++){
+    const h = 6 + Math.random()*18;
+    bars+=`<span class="voiceBar" style="height:${h}px" data-i="${i}"></span>`;
+  }
+  return bars;
+}
+
+function rAudioCloud(m){
+  if(m.type!=='audio') return esc(m.text||'');
+  const src = m.cloudUrl || m.audio;
+  if(!src) return '';
+  const id = 'voice_'+Math.random().toString(36).substr(2,9);
+  const dur = m.duration || '00:00';
+  const isMine = m.sender==='parent' ? '' : 'mine';
+  // WhatsApp style bubble
+  return `
+    <div class="voiceBubble ${isMine}" id="wrap_${id}">
+      <button type="button" class="voicePlay" id="btn_${id}" onclick="toggleVoicePlay('${id}')">▶️</button>
+      <div class="voiceWaveWrap">
+        <div class="voiceWave" id="wave_${id}" onclick="seekVoice(event,'${id}')">${generateWaveBars()}</div>
+        <div class="voiceMeta"><span class="voiceTime" id="time_${id}">${dur}</span><span class="voiceDuration">${dur}</span></div>
+      </div>
+      <audio id="${id}" src="${src}" preload="metadata" ontimeupdate="updateVoiceProgress('${id}')" onended="voiceEnded('${id}')" onloadedmetadata="setVoiceDuration('${id}')"></audio>
+    </div>`;
+}
+
+function setVoiceDuration(id){
+  const a=document.getElementById(id), t=document.getElementById('time_'+id);
+  if(a && a.duration && isFinite(a.duration)){
+    const txt=fT(a.duration);
+    if(t) t.textContent=txt;
+    const dEl=document.querySelector(`#wrap_${id} .voiceDuration`);
+    if(dEl) dEl.textContent=txt;
+  }
+}
+
+function toggleVoicePlay(id){
+  const audio=document.getElementById(id);
+  const btn=document.getElementById('btn_'+id);
+  if(!audio) return;
+  if(currentlyPlaying && currentlyPlaying!==audio){
+    currentlyPlaying.pause();
+    const prevBtn=document.getElementById('btn_'+currentlyPlaying.id);
+    if(prevBtn){prevBtn.textContent='▶️';prevBtn.classList.remove('playing');}
+  }
+  if(audio.paused){
+    audio.play().then(()=>{
+      btn.textContent='⏸️';btn.classList.add('playing');
+      currentlyPlaying=audio;
+    }).catch(e=>toast('اضغط مرة تانية للتشغيل'));
+  }else{
+    audio.pause();
+    btn.textContent='▶️';btn.classList.remove('playing');
+  }
+}
+
+function updateVoiceProgress(id){
+  const audio=document.getElementById(id);
+  const wave=document.getElementById('wave_'+id);
+  const timeEl=document.getElementById('time_'+id);
+  if(!audio||!wave) return;
+  const pct = audio.currentTime / (audio.duration||1);
+  const bars=wave.querySelectorAll('.voiceBar');
+  const activeCount=Math.floor(pct*bars.length);
+  bars.forEach((b,i)=>{
+    if(i<activeCount){b.classList.add('played');b.classList.remove('active');}
+    else{b.classList.remove('played');}
+  });
+  if(timeEl){
+    timeEl.textContent = fT(audio.currentTime)+' / '+fT(audio.duration||0);
+  }
+}
+
+function voiceEnded(id){
+  const btn=document.getElementById('btn_'+id);
+  const wave=document.getElementById('wave_'+id);
+  if(btn){btn.textContent='▶️';btn.classList.remove('playing');}
+  if(wave){wave.querySelectorAll('.voiceBar').forEach(b=>b.classList.remove('played'));}
+  currentlyPlaying=null;
+  const audio=document.getElementById(id);
+  if(audio){audio.currentTime=0;}
+}
+
+function seekVoice(e,id){
+  const audio=document.getElementById(id);
+  const wave=document.getElementById('wave_'+id);
+  if(!audio||!wave||!audio.duration) return;
+  const rect=wave.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  let pct=x/rect.width;
+  // Fix RTL: site is RTL but wave is LTR, so invert for RTL context
+  const isRTL = document.documentElement.dir==='rtl' || document.body.dir==='rtl' || getComputedStyle(document.body).direction==='rtl';
+  if(isRTL){
+    // In RTL, visual start is right side, but we set wave as LTR, so keep LTR logic
+    // Actually user reported inverted, so we flip it
+    // For WhatsApp style: left = start, right = end even in RTL
+    pct = Math.max(0,Math.min(1,pct));
+  }
+  audio.currentTime=pct*audio.duration;
+  updateVoiceProgress(id);
+}
+
+function renderConversation(sid){const el=document.getElementById("chatConversation"),conv=db.conversations[sid]||[];if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}el.innerHTML=conv.map(msg=>{const cls=msg.sender==="teacher"?"teacher":"parent",sender=msg.sender==="teacher"?"أنت":"ولي الأمر";const seen=msg.seen?"✓✓":"✓";const cnt=msg.type==='audio'?rAudioCloud(msg):esc(msg.text);return `<div class="msg ${cls}"><strong>${sender}</strong><br>${cnt}${msg.note?`<br><small>ملحوظة: ${esc(msg.note)}</small>`:''}<span class="time">${esc(msg.time||'')} ${msg.sender==="teacher"?seen:''}</span></div>`}).join("");el.scrollTop=el.scrollHeight}
+function renderParentConversation(sid){const el=document.getElementById("parentConversation");if(!el)return;const conv=db.conversations[sid]||[];if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}el.innerHTML=conv.map(msg=>{const cls=msg.sender==="teacher"?"teacher":"parent",sender=msg.sender==="teacher"?"المعلم":"أنت";const seen=msg.seen?"✓✓":"✓";const cnt=msg.type==='audio'?rAudioCloud(msg):esc(msg.text);return `<div class="msg ${cls}"><strong>${sender}</strong><br>${cnt}<span class="time">${esc(msg.time||'')} ${msg.sender==="parent"?seen:''}</span></div>`}).join("");el.scrollTop=el.scrollHeight}
+
+
+// ===== Median.co Microphone Permission Fix =====
+async function requestMedianMicPermission(){
+  try{
+    // Check if running inside Median app
+    if(window.median && window.median.permissions){
+      console.log('Median detected, requesting mic permission...');
+      // Request microphone permission via Median bridge
+      const result = await median.permissions.request(["Microphone"]);
+      console.log('Median permission result:', result);
+      if(result && result.Microphone === 'granted'){
+        return true;
+      } else {
+        // Show settings button
+        toast('الميكروفون مقفول - دوس للفتح من الإعدادات');
+        setTimeout(()=>{
+          if(confirm('تفتح إعدادات التطبيق عشان تسمح للميكروفون؟')){
+            median.open.appSettings();
+          }
+        },500);
+        return false;
+      }
+    }
+    // Check if in Median via user agent
+    if(navigator.userAgent.includes('median') || navigator.userAgent.includes('Median') || window.gonative){
+      console.log('Median WebView detected via UA');
+      // Try gonative bridge too (old name)
+      if(window.gonative && window.gonative.permissions){
+        const res = await gonative.permissions.request(["Microphone"]);
+        return res && res.Microphone === 'granted';
+      }
+    }
+  }catch(e){
+    console.error('Median permission error', e);
+  }
+  return null; // Not in Median or failed, fallback to web
+}
+
+// Override stV to include Median permission
+const originalStV = stV;
+stV = async function(t){
+  // Try Median permission first
+  const medianResult = await requestMedianMicPermission();
+  if(medianResult === false){
+    // Denied, don't try web getUserMedia
+    showPermHelp(t);
+    return;
+  }
+  // Continue with normal flow
+  return originalStV(t);
+};
+
+// ===== Teacher persistence like parent =====
+function saveTeacherSession(){localStorage.setItem('teacherLogged','true')}
+function checkTeacherSession(){
+  try{
+    const saved = localStorage.getItem('teacherLogged');
+    if(saved==='true'){
+      // Keep teacher logged
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ===== Seen logic fix - both directions =====
+function markConversationSeen(sid, viewer){
+  if(!db.conversations[sid]) return;
+  let changed=false;
+  db.conversations[sid].forEach(m=>{
+    // If viewer is teacher, mark parent messages as seen
+    // If viewer is parent, mark teacher messages as seen
+    if(viewer==='teacher' && m.sender==='parent' && !m.seen){m.seen=true;changed=true;}
+    if(viewer==='parent' && m.sender==='teacher' && !m.seen){m.seen=true;changed=true;}
+  });
+  if(changed) save();
+}
+
+// Override render functions to mark seen
+const _origRenderConv = renderConversation;
+renderConversation = function(sid){
+  _origRenderConv(sid);
+  markConversationSeen(sid,'teacher');
+  // Update student list sorting if needed
+  if(typeof renderStudents==='function') setTimeout(renderStudents,100);
+}
+
+const _origRenderParentConv = renderParentConversation;
+renderParentConversation = function(sid){
+  _origRenderParentConv(sid);
+  markConversationSeen(sid,'parent');
+}
+
+// ===== Remove unread badge from student list, only show in conversations & sort unread first =====
+function getUnreadCount(sid){
+  const conv=db.conversations[sid]||[];
+  return conv.filter(m=>m.sender==='parent' && !m.seen).length;
+}
+
+// Patch renderStudents to sort by unread first and remove chat icon badge
+(function(){
+  const origRenderStudents = window.renderStudents;
+  if(!origRenderStudents) return;
+  window.renderStudents = function(){
+    // Sort students: unread first
+    const studentsCopy = [...(db.students||[])];
+    studentsCopy.sort((a,b)=>{
+      const unreadA=getUnreadCount(a.id);
+      const unreadB=getUnreadCount(b.id);
+      if(unreadA>0 && unreadB===0) return -1;
+      if(unreadB>0 && unreadA===0) return 1;
+      // Then by last message time
+      const convA=db.conversations[a.id]||[];
+      const convB=db.conversations[b.id]||[];
+      const timeA=convA.length?convA[convA.length-1].timestamp:0;
+      const timeB=convB.length?convB[convB.length-1].timestamp:0;
+      return timeB-timeA;
+    });
+    
+    // Temporarily replace db.students for rendering, then restore
+    const originalStudents = db.students;
+    db.students = studentsCopy;
+    origRenderStudents();
+    db.students = originalStudents;
+    
+    // Remove any chat icons badges from student cards (the 💬 icon with count)
+    setTimeout(()=>{
+      document.querySelectorAll('.studentCard .unreadBadge, .studentCard .chatIcon, .studentItem .unreadBadge').forEach(el=>{
+        // Only remove if it's outside conversation view (in student list)
+        if(el.closest('#studentsList') || el.closest('.studentsGrid')){
+          // Keep but hide the bubble count next to student? User said remove it completely
+          el.style.display='none';
+        }
+      });
+      // Also hide any element that shows 💬 with number in student list
+      document.querySelectorAll('[class*="unread"], [class*="badge"]').forEach(el=>{
+        if(el.textContent.includes('💬') && (el.closest('#studentsList') || el.closest('.studentsGrid'))){
+          el.style.display='none';
+        }
+      });
+    },50);
+  };
+})();
+
+// ===== Bulk delete with checkboxes =====
+let bulkDeleteMode=false;
+let selectedForDelete=new Set();
+
+function toggleBulkDeleteMode(){
+  bulkDeleteMode=!bulkDeleteMode;
+  selectedForDelete.clear();
+  const btn=document.getElementById('bulkDeleteBtn');
+  const actions=document.getElementById('bulkDeleteActions');
+  if(bulkDeleteMode){
+    if(btn) btn.textContent='إلغاء';
+    if(actions) actions.classList.remove('hidden');
+  }else{
+    if(btn) btn.textContent='حذف مجموعة';
+    if(actions) actions.classList.add('hidden');
+  }
+  if(typeof renderStudents==='function') renderStudents();
+}
+
+function toggleStudentSelect(id){
+  if(selectedForDelete.has(id)) selectedForDelete.delete(id);
+  else selectedForDelete.add(id);
+  updateBulkDeleteCount();
+}
+
+function updateBulkDeleteCount(){
+  const countEl=document.getElementById('bulkDeleteCount');
+  if(countEl) countEl.textContent = `${selectedForDelete.size} محدد`;
+  const delBtn=document.getElementById('doBulkDeleteBtn');
+  if(delBtn) delBtn.disabled = selectedForDelete.size===0;
+}
+
+function doBulkDelete(){
+  if(selectedForDelete.size===0){toast('اختار طلاب أولاً');return;}
+  if(!confirm(`متأكد تحذف ${selectedForDelete.size} طالب؟`)) return;
+  db.students = db.students.filter(s=>!selectedForDelete.has(s.id));
+  // Also delete their conversations and grades
+  selectedForDelete.forEach(id=>{
+    if(db.conversations) delete db.conversations[id];
+    if(db.grades) delete db.grades[id];
+  });
+  selectedForDelete.clear();
+  bulkDeleteMode=false;
+  save();
+  const actions=document.getElementById('bulkDeleteActions');
+  if(actions) actions.classList.add('hidden');
+  const btn=document.getElementById('bulkDeleteBtn');
+  if(btn) btn.textContent='حذف مجموعة';
+  if(typeof renderStudents==='function') renderStudents();
+  toast('تم الحذف ✓');
+}
+
+function selectAllStudents(){
+  db.students.forEach(s=>selectedForDelete.add(s.id));
+  if(typeof renderStudents==='function') renderStudents();
+  updateBulkDeleteCount();
+}
+
+function deselectAllStudents(){
+  selectedForDelete.clear();
+  if(typeof renderStudents==='function') renderStudents();
+  updateBulkDeleteCount();
+}
+
+// (تم حذف المراقب القديم للـ checkboxes: renderStudents بيرسمها بنفسه)
+
+// ===== End Median Fix =====
+
+// ===== PWA Microphone Permission Fix =====
+async function checkMicPermission(){
+  try{
+    if(navigator.permissions){
+      const perm=await navigator.permissions.query({name:'microphone'});
+      return perm.state;
+    }
+  }catch(e){}
+  return 'unknown';
+}
+
+function showPermHelp(target){
+  const wrapId = target==='p' ? 'pWrap' : 'tWrap';
+  const wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  let box=document.getElementById('permHelp_'+target);
+  if(box) box.remove();
+  box=document.createElement('div');
+  box.id='permHelp_'+target;
+  box.className='permBox';
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+  if(isPWA){
+    box.innerHTML = `
+      <strong>🎤 الميكروفون محتاج إذن أول مرة</strong><br>
+      التطبيق المثبت مش بيطلب الإذن تلقائي. افتح الرابط ده في كروم واسمح بالميكروفون، وبعدها هيرجع يشتغل هنا.<br>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button type="button" class="btn gold" style="padding:8px 14px;font-size:13px" onclick="openInBrowser()">🌐 فتح في كروم و السماح</button>
+        <button type="button" class="btn soft" style="padding:8px 12px;font-size:12px" onclick="requestMicAgain('${target}')">🔄 حاول تاني هنا</button>
+        <button type="button" class="btn soft" style="padding:6px 10px;font-size:12px" onclick="this.parentElement.parentElement.remove()">إغلاق</button>
+      </div>
+      <small style="display:block;margin-top:8px;color:#aaa">بعد ما تسمح في كروم، ارجع افتح التطبيق تاني وهيشتغل</small>
+    `;
+  } else {
+    box.innerHTML = `
+      <strong>🎤 لازم تسمح للميكروفون</strong><br>
+      المتصفح منع الميكروفون. دوس على 🔒 أو 🎤 في شريط العنوان فوق واختار Allow.<br>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button type="button" class="btn gold" style="padding:8px 14px;font-size:13px" onclick="requestMicAgain('${target}')">🔄 سماح وحاول تاني</button>
+        <button type="button" class="btn soft" style="padding:6px 10px;font-size:12px" onclick="this.parentElement.parentElement.remove()">إغلاق</button>
+      </div>
+    `;
+  }
+  wrap.parentNode.insertBefore(box, wrap.nextSibling);
+  // Auto hide after 15 sec
+  setTimeout(()=>{if(box&&box.parentNode) box.remove()},15000);
+}
+
+function openInBrowser(){
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:'نظام متابعة الطلاب', url:url});
+  }else{
+    window.open(url,'_blank');
+    toast('انسخ الرابط وافتحه في كروم');
+  }
+}
+
+async function requestMicAgain(target){
+  const box=document.getElementById('permHelp_'+target);
+  if(box) box.remove();
+  stV(target);
+}
+
+async function uploadToCloudinary(blob){
+  if(CLOUDINARY_CLOUD_NAME==="demo" || !CLOUDINARY_CLOUD_NAME){
+    return new Promise(res=>{const r=new FileReader();r.onloadend=()=>res({url:r.result, isBase64:true});r.readAsDataURL(blob);});
+  }
+  const formData=new FormData();
+  formData.append('file', blob);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('resource_type', 'auto');
+  formData.append('folder', 'student_voices');
+  try{
+    const resp=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,{method:'POST',body:formData});
+    const data=await resp.json();
+    if(data.secure_url) return {url:data.secure_url, isBase64:false};
+    throw new Error('upload failed');
+  }catch(e){
+    console.error(e);
+    return new Promise(res=>{const r=new FileReader();r.onloadend=()=>res({url:r.result, isBase64:true});r.readAsDataURL(blob);});
+  }
+}
+
+async function stV(t){
+  try{
+    // PWA fix: must trigger from user gesture and handle permission
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      toast('المتصفح ده مش بيدعم التسجيل - جرب كروم');
+      return;
+    }
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    rs=stream;ch=[];mr=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm',audioBitsPerSecond:16000});
+    mr.ondataavailable=e=>{if(e.data.size>0)ch.push(e.data)};
+    mr.onstop=()=>hStop(t);
+    mr.start(100);tgt=t;rSt=Date.now();
+    const inp=t==='p'?'parentMessageInput':'chatMessageInput',sBtn=t==='p'?'pSend':'tSend',mBtn=t==='p'?'pMic':'tMic',rBox=t==='p'?'pRec':'tRec';
+    document.getElementById(inp)?.classList.add('hidden');document.getElementById(sBtn)?.classList.add('hidden');document.getElementById(mBtn)?.classList.add('rec');document.getElementById(rBox)?.classList.remove('hidden');
+    rt=setInterval(()=>{const e=Math.floor((Date.now()-rSt)/1000);const el=document.getElementById(t==='p'?'pT':'tT');if(el)el.textContent=fT(e)},500);
+    setTimeout(()=>{if(mr&&mr.state==='recording')sV(t)},90000);
+    // remove perm help if exists
+    const box=document.getElementById('permHelp_'+t);
+    if(box) box.remove();
+  }catch(e){
+    console.error('Mic error',e);
+    if(e.name==='NotAllowedError' || e.name==='PermissionDeniedError'){
+      showPermHelp(t);
+    }else if(e.name==='NotFoundError'){
+      toast('مفيش ميكروفون في الجهاز ده');
+    }else{
+      toast('الميكروفون مش شغال - افتحه من المتصفح أول مرة');
+      showPermHelp(t);
+    }
+  }
+}
+
+async function hStop(t){
+  clearInterval(rt);
+  const blob=new Blob(ch,{type:mr.mimeType});
+  if(blob.size<800){toast('قصير جداً');clV(t);return}
+  const d=Math.floor((Date.now()-rSt)/1000);
+  toast('جاري الرفع...');
+  const uploaded=await uploadToCloudinary(blob);
+  if(t==='p'){
+    const sid=parentLoggedInCode&&(db.students.find(x=>x.code===parentLoggedInCode)||{}).id;
+    if(sid){
+      if(uploaded.isBase64) addMsgCloud(sid,'parent','', '', {type:'audio',audio:uploaded.url,duration:fT(d)});
+      else addMsgCloud(sid,'parent','', '', {type:'audio',cloudUrl:uploaded.url,duration:fT(d)});
+      renderParentConversation(sid);
+    }
+  }else{
+    if(currentChatStudentId){
+      if(uploaded.isBase64) addMsgCloud(currentChatStudentId,'teacher','', '', {type:'audio',audio:uploaded.url,duration:fT(d)});
+      else addMsgCloud(currentChatStudentId,'teacher','', '', {type:'audio',cloudUrl:uploaded.url,duration:fT(d)});
+      renderConversation(currentChatStudentId);
+    }
+  }
+  clV(t);
+  if(rs){rs.getTracks().forEach(x=>x.stop());rs=null}
+  toast('تم الإرسال ✓');
+}
+
+function clV(t){clearInterval(rt);const inp=t==='p'?'parentMessageInput':'chatMessageInput',sBtn=t==='p'?'pSend':'tSend',mBtn=t==='p'?'pMic':'tMic',rBox=t==='p'?'pRec':'tRec',tEl=t==='p'?'pT':'tT';document.getElementById(inp)?.classList.remove('hidden');document.getElementById(sBtn)?.classList.remove('hidden');document.getElementById(mBtn)?.classList.remove('rec');document.getElementById(rBox)?.classList.add('hidden');const te=document.getElementById(tEl);if(te)te.textContent='00:00';tgt=null}
+function togV(t){if(tgt===t&&mr?.state==='recording')sV(t);else stV(t)}
+function sV(t){if(mr&&mr.state==='recording')mr.stop()}
+function cV(t){if(mr&&mr.state==='recording'){mr.onstop=null;mr.stop()}if(rs){rs.getTracks().forEach(x=>x.stop());rs=null}clearInterval(rt);ch=[];clV(t);toast('تم الإلغاء')}
+
+// اتصال Firebase — تحديث لحظي بين كل الأجهزة
+dataRef.onSnapshot(snap=>{
+  if(snap.exists){
+    applyRemoteData(snap.data());
+  }else{
+    // أول مرة: أنشئ المستند الفارغ
+    dataRef.set({students:[],conversations:{},customGroups:[]}).catch(err=>{
+      console.error(err);
+      setDbStatus("err",err&&err.code?err.code:"فشل الإنشاء");
+    });
+  }
+  setDbStatus("ok");
+  if(!firebaseReady){
+    firebaseReady=true;
+    customGroups=db.customGroups||[];
+    renderAll();
+    try{
+      const teacherHere=localStorage.getItem("teacherLogged")||localStorage.getItem("teacherPermanentLogin_v4")||localStorage.getItem("teacher_session_active");
+      const saved=localStorage.getItem(PARENT_SESSION_KEY);
+      if(saved&&!teacherHere){
+        if(!enterParentSession(saved)) localStorage.removeItem(PARENT_SESSION_KEY);
+      }
+    }catch(e){}
+  }
+},err=>{
+  console.error(err);
+  const code=err&&err.code?err.code:"";
+  setDbStatus("err",code||"تعذر الاتصال");
+  if(code==="permission-denied"){
+    alert("القراءة من قاعدة البيانات اترفضت (permission-denied).\nصلاحيات Firestore Rules محتاجة تتظبط من لوحة Firebase، والبيانات مش هتظهر ولا هتتحفظ قبل كده.");
+  }else{
+    toast("تعذر الاتصال بقاعدة البيانات: "+(code||"تحقق من الإنترنت"));
+  }
+  renderAll();
+});
+</script>
+
+<script>
+// Force mic buttons visible and check HTTPS
+document.addEventListener('DOMContentLoaded', ()=>{
+  saveTeacherSession();
+  checkTeacherSession();
+  setDbStatus(firebaseReady?"ok":"wait");
+
+  // Ensure mic buttons exist and are visible
+  ['pMic','tMic'].forEach(id=>{
+    const btn=document.getElementById(id);
+    if(btn){btn.style.display='grid';console.log('Mic button found:',id);}
+    else{console.error('Mic button missing:',id);}
+  });
+});
+</script>
+
+
+<script>
+// ===== ULTRA FIXES V4 - كل مشاكل المجموعات والتسجيل والرسائل =====
+
+// 1. نظام المجموعات - إصلاح كامل
+window.renderCustomGroups = window.renderCustomGroups || window.renderGroups;
+(function(){
+  // Override group rendering to avoid gigi bug
+  const origRenderGroups = window.renderCustomGroups;
+  if(origRenderGroups){
+    window.renderCustomGroups = function(){
+      const el=document.getElementById('customGroupsList');
+      if(!el) return;
+      const groups=db.customGroups||[];
+      if(!groups.length){ el.innerHTML='<div class="empty">لا توجد مجموعات</div>'; return; }
+      el.innerHTML=groups.map((g,idx)=>{
+        const name = (typeof g==='string')?g:(g.name||g);
+        const level = (typeof g==='object')? (g.level||'') : '';
+        return `<div class="groupItem" style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #292722;border-radius:12px;margin-bottom:8px;background:#121210"><div><strong>${esc(name)}</strong> ${level?`<small style="color:#aaa395"> - ${esc(level)}</small>`:''}</div><div style="display:flex;gap:6px"><button type="button" class="btn soft" onclick="editCustomGroup(${idx})">تعديل</button><button type="button" class="btn danger" onclick="deleteCustomGroup(${idx})">حذف</button></div></div>`;
+      }).join('');
+    };
+  }
+
+  window.editCustomGroup = window.editCustomGroup || function(idx){
+    const g=db.customGroups[idx];
+    const name=typeof g==='string'?g:g.name;
+    const level=typeof g==='object'?g.level||'':'';
+    const newName=prompt('اسم المجموعة:',name);
+    if(newName===null) return;
+    const newLevel=prompt('الصف (مثال: الصف الثاني الإعدادي أو اتركه فاضي للكل):',level);
+    if(newLevel===null) return;
+    db.customGroups[idx]={name:newName.trim(), level:newLevel.trim()};
+    save(); renderCustomGroups(); renderGroupFilter(); toast('تم التعديل');
+  };
+
+  window.deleteCustomGroup = window.deleteCustomGroup || function(idx){
+    if(!confirm('حذف المجموعة؟')) return;
+    db.customGroups.splice(idx,1);
+    save(); renderCustomGroups(); renderGroupFilter();
+  };
+
+  // إصلاح فلتر المجموعات
+  window.renderGroupFilter = function(){
+    const sel=document.getElementById('studentGroupFilter');
+    const sel2=document.getElementById('groupFilter');
+    const groups=db.customGroups||[];
+    const opts='<option value="">بدون مجموعة</option><option value="all">جميع المجموعات</option>'+groups.map(g=>{
+      const n=typeof g==='string'?g:g.name;
+      return `<option value="${esc(n)}">${esc(n)}</option>`;
+    }).join('');
+    if(sel) sel.innerHTML=opts;
+    if(sel2) sel2.innerHTML=opts;
+  };
+})();
+
+// 2. المعلم يفضل متسجل زي ولي الأمر - مرة واحدة بس
+(function(){
+  const TEACHER_PERM_KEY='teacherPermanentLogin_v4';
+  window.saveTeacherSession = function(){
+    try{ localStorage.setItem(TEACHER_PERM_KEY,'1'); localStorage.setItem('teacherLogged','true'); }catch(e){}
+  };
+  window.checkTeacherSession = function(){
+    try{
+      if(localStorage.getItem(TEACHER_PERM_KEY) || localStorage.getItem('teacherLogged')){
+        const tp=document.getElementById('teacherPanel');
+        const lp=document.getElementById('teacherLogin');
+        const publicPanel=document.getElementById('publicPanel');
+        const parentPanel=document.getElementById('parentPanel');
+        if(tp){
+          tp.classList.remove('hidden');
+          if(lp) lp.classList.add('hidden');
+          if(publicPanel) publicPanel.classList.add('hidden');
+          if(parentPanel) parentPanel.classList.add('hidden');
+          document.getElementById('teacherBtn')?.classList.add('hidden');
+          if(typeof renderAll==='function') renderAll();
+        }
+        return true;
+      }
+    }catch(e){}
+    return false;
+  };
+  window.logoutTeacher = function(){
+    try{ localStorage.removeItem(TEACHER_PERM_KEY); localStorage.removeItem('teacherLogged'); }catch(e){}
+    location.reload();
+  };
+  // Auto check on load
+  setTimeout(()=>checkTeacherSession(),400);
+})();
+
+// 3. الرسائل الغير مقروءة تطلع فوق للمدرس فقط - بالعلامة الحمراء
+(function(){
+  function countUnreadForStudent(sid){
+    const conv=db.conversations[sid]||[];
+    return conv.filter(m=>m.sender==='parent' && !m.seen).length;
+  }
+  
+  function sortStudentsForTeacher(){
+    const students=db.students||[];
+    return [...students].sort((a,b)=>{
+      const unreadA=countUnreadForStudent(a.id);
+      const unreadB=countUnreadForStudent(b.id);
+      if(unreadA>0 && unreadB===0) return -1;
+      if(unreadB>0 && unreadA===0) return 1;
+      if(unreadA!==unreadB) return unreadB-unreadA;
+      const convA=db.conversations[a.id]||[];
+      const convB=db.conversations[b.id]||[];
+      const lastA=convA.length?convA[convA.length-1].timestamp:0;
+      const lastB=convB.length?convB[convB.length-1].timestamp:0;
+      return lastB-lastA;
+    });
+  }
+
+  // Override renderStudents for teacher panel to use sorted
+  const origRenderStudents = window.renderStudents;
+  window.renderStudents = function(){
+    if(!origRenderStudents) return;
+    // Check if we're in teacher panel
+    const teacherPanel=document.getElementById('teacherPanel');
+    const isTeacherVisible=teacherPanel && !teacherPanel.classList.contains('hidden');
+    
+    if(isTeacherVisible){
+      // Temporarily sort db.students view for rendering
+      const origStudents=[...db.students];
+      db.students=sortStudentsForTeacher();
+      origRenderStudents();
+      db.students=origStudents;
+      
+      // Add red badge and push unread to visual top
+      setTimeout(()=>{
+        const list=document.getElementById('studentsList');
+        if(!list) return;
+        // Ensure DOM order matches sorted order (already done by using sorted array)
+        // Add pulse animation for unread
+      },50);
+    }else{
+      origRenderStudents();
+    }
+  };
+
+  // Also for conversations tab
+  const origRenderConversations = window.renderConversations || window.renderConversationsList;
+  if(origRenderConversations){
+    const fnName = window.renderConversationsList ? 'renderConversationsList' : 'renderConversations';
+    const _orig=window[fnName];
+    window[fnName]=function(){
+      _orig();
+      setTimeout(()=>{
+        const list=document.getElementById('conversationsList') || document.getElementById('chatList');
+        if(!list) return;
+        const cards=[...list.children];
+        cards.sort((a,b)=>{
+          const getId=(el)=>{
+            const m=el.outerHTML.match(/openChat\(['"]([^'"]+)['"]\)/) || el.outerHTML.match(/data-id=['"]([^'"]+)['"]/);
+            return m?m[1]:'';
+          };
+          const idA=getId(a); const idB=getId(b);
+          const unreadA=countUnreadForStudent(idA);
+          const unreadB=countUnreadForStudent(idB);
+          if(unreadA>0 && unreadB===0) return -1;
+          if(unreadB>0 && unreadA===0) return 1;
+          if(unreadA!==unreadB) return unreadB-unreadA;
+          const tA=(db.conversations[idA]?.slice(-1)[0]?.timestamp)||0;
+          const tB=(db.conversations[idB]?.slice(-1)[0]?.timestamp)||0;
+          return tB-tA;
+        });
+        cards.forEach(c=>list.appendChild(c));
+      },80);
+    };
+  }
+})();
+
+// 4. التقرير الشهري - يوضح شهر ايه
+window.sendMonthlyReportToParents = function(){
+  if(!currentReportResults || !currentReportResults.length){toast("اعرض التقرير أولاً");return}
+  const monthSelect=document.getElementById('reportMonth');
+  const monthVal=monthSelect?.value||'all';
+  const monthText=monthSelect?.selectedOptions[0]?.text||monthVal;
+  const isAll=monthVal==='all';
+  
+  const now=new Date();
+  const monthName = isAll ? 'الفترة الكاملة' : monthText;
+  const year = now.getFullYear();
+  
+  const total=currentReportResults.length;
+  if(!confirm(`إرسال تقرير ${monthName} لـ ${total} طالب إلى أولياء أمورهم؟`)) return;
+  
+  currentReportResults.forEach((r,idx)=>{
+    const rankText=`الترتيب: ${idx+1} من ${total}`;
+    const avgText=`النسبة: ${r.avgScore}%`;
+    const levelText=`الصف: ${r.student.level||''}`;
+    const groupText=r.student.group?`المجموعة: ${r.student.group}`:'';
+    
+    const msg=isAll
+      ? `📊 التقرير الشامل - ${monthName}
+الطالب: ${r.student.name}
+${levelText}
+${groupText}
+${rankText}
+${avgText}
+📅 التاريخ: ${now.toLocaleDateString('ar-EG')}
+هذا التقرير يشمل جميع التسميعات والاختبارات حتى الآن.`
+      : `📊 التقرير الشهري - ${monthName} ${year}
+الطالب: ${r.student.name}
+${levelText}
+${groupText}
+${rankText}
+${avgText}
+📅 شهر: ${monthName}
+هذا التقرير خاص بشهر ${monthName} فقط.`;
+    
+    addConversationMessage(r.student.id,"teacher",msg);
+  });
+  save();
+  toast(`تم إرسال تقرير ${monthName} لـ ${total} ولي أمر ✓`);
+  if(typeof renderChatList==='function') renderChatList();
+};
+
+// 5. التسميع الجماعي - منع درجة أكبر من الدرجة القصوى
+window.validateGroupRecitationScores = function(){
+  const maxInput=document.getElementById('groupRecMaxScore') || document.getElementById('maxScore');
+  const max=parseFloat(maxInput?.value||'10');
+  if(!max || isNaN(max)){ toast('حدد الدرجة القصوى أولاً'); return false; }
+  
+  const scoreInputs=document.querySelectorAll('.groupScoreInput, [id^="score_"]');
+  let hasError=false;
+  scoreInputs.forEach(inp=>{
+    const val=parseFloat(inp.value);
+    if(!isNaN(val) && val>max){
+      inp.style.border='2px solid #e35d6a';
+      inp.style.background='rgba(227,93,106,.1)';
+      hasError=true;
+      const errId='err_'+inp.id;
+      let errEl=document.getElementById(errId);
+      if(!errEl){
+        errEl=document.createElement('div');
+        errEl.id=errId;
+        errEl.style.cssText='color:#ff7b86;font-size:11px;margin-top:4px';
+        inp.parentNode.appendChild(errEl);
+      }
+      errEl.textContent=`⚠️ الدرجة أكبر من القصوى (${max}) - الدرجة ${val} غير صحيحة!`;
+    }else{
+      inp.style.border='';
+      inp.style.background='';
+      const errEl=document.getElementById('err_'+inp.id);
+      if(errEl) errEl.remove();
+    }
+  });
+  
+  if(hasError){
+    toast('❌ فيه درجات أكبر من الدرجة القصوى!');
+    return false;
+  }
+  return true;
+};
+
+// Hook on save group recitation
+(function(){
+  const origSaveGroupRec=window.saveGroupRecitation;
+  if(origSaveGroupRec){
+    window.saveGroupRecitation=function(){
+      if(!validateGroupRecitationScores()) return;
+      origSaveGroupRec();
+    };
+  }
+  // Also validate on input change
+  document.addEventListener('input', (e)=>{
+    if(e.target.classList.contains('groupScoreInput') || e.target.id?.startsWith('score_')){
+      const maxInput=document.getElementById('groupRecMaxScore') || document.getElementById('maxScore');
+      const max=parseFloat(maxInput?.value||'10');
+      const val=parseFloat(e.target.value);
+      if(!isNaN(val) && !isNaN(max) && val>max){
+        e.target.style.border='2px solid #e35d6a';
+        toast(`الدرجة ${val} أكبر من القصوى ${max}!`, true);
+      }else{
+        e.target.style.border='';
+      }
+    }
+  });
+})();
+
+// 7. تحسين الشكل - تأثيرات خلفية
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+    body::before{
+      content:''; position:fixed; inset:0; z-index:-1;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(215,173,85,.12), transparent 25%),
+        radial-gradient(circle at 80% 90%, rgba(215,173,85,.08), transparent 30%),
+        radial-gradient(circle at 50% 50%, rgba(215,173,85,.03), transparent 50%),
+        #070707;
+      pointer-events:none;
+    }
+    body::after{
+      content:''; position:fixed; width:600px; height:600px; z-index:-1;
+      left:-200px; top:-200px;
+      background: radial-gradient(circle, rgba(215,173,85,.06), transparent 70%);
+      border-radius:50%;
+      animation: floatBg 20s infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes floatBg{
+      0%{ transform:translate(0,0) scale(1); }
+      100%{ transform:translate(100px,100px) scale(1.2); }
+    }
+    .card{
+      backdrop-filter: blur(12px);
+      background: linear-gradient(145deg, rgba(255,255,255,.04), rgba(255,255,255,.015)) !important;
+      border:1px solid rgba(215,173,85,.15) !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05) !important;
+      transition: all .3s ease;
+    }
+    .card:hover{
+      border-color: rgba(215,173,85,.25) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 25px 70px rgba(0,0,0,.5), 0 0 30px rgba(215,173,85,.08) !important;
+    }
+    .student{
+      background: linear-gradient(145deg, rgba(20,19,17,.9), rgba(14,14,13,.9)) !important;
+      backdrop-filter: blur(8px);
+      position:relative;
+      overflow:hidden;
+    }
+    .student::before{
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: linear-gradient(135deg, rgba(215,173,85,.06), transparent 60%);
+      opacity:0; transition:.3s;
+    }
+    .student:hover::before{ opacity:1; }
+    .student:has(.unreadBadge){
+      border-color: rgba(227,93,106,.4) !important;
+      background: linear-gradient(145deg, rgba(30,20,20,.9), rgba(14,14,13,.9)) !important;
+    }
+    .unreadBadge{
+      background: linear-gradient(145deg,#ff4d5a,#c62828) !important;
+      color:#fff !important;
+      font-weight:900;
+      animation: pulseRed 2s infinite;
+      box-shadow: 0 0 15px rgba(255,77,90,.5);
+    }
+    @keyframes pulseRed{
+      0%,100%{ transform:scale(1); box-shadow:0 0 10px rgba(255,77,90,.4); }
+      50%{ transform:scale(1.05); box-shadow:0 0 20px rgba(255,77,90,.7); }
+    }
+    .hero{
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::after{
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(45deg, transparent 30%, rgba(215,173,85,.05) 50%, transparent 70%);
+      animation: shimmer 8s infinite;
+      pointer-events:none;
+    }
+    @keyframes shimmer{
+      0%{ transform:translateX(-100%); }
+      100%{ transform:translateX(100%); }
+    }
+    .btn.gold{
+      position:relative; overflow:hidden;
+    }
+    .btn.gold::after{
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+      transform:translateX(-100%);
+      transition:.5s;
+    }
+    .btn.gold:hover::after{ transform:translateX(100%); }
+  `;
+  document.head.appendChild(style);
+})();
+
+// 8. إصلاح التاريخ في المحادثة - واتس ستايل حقيقي
+window.renderConversation = function(sid){
+  const el=document.getElementById('chatConversation');
+  if(!el) return;
+  let conv=db.conversations[sid]||[];
+  conv=[...conv].sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+  if(!conv.length){ el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>'; return; }
+  
+  function getDayName(d){ return ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][d.getDay()]; }
+  
+  let lastDate=''; let html='';
+  conv.forEach(msg=>{
+    const ts=msg.timestamp||Date.now();
+    const d=new Date(ts);
+    const dStr=d.toDateString();
+    if(dStr!==lastDate){
+      const today=new Date().toDateString();
+      const yest=new Date(Date.now()-86400000).toDateString();
+      let label='';
+      if(dStr===today) label='اليوم';
+      else if(dStr===yest) label='أمس';
+      else label=getDayName(d);
+      const dateFull=d.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+      html+=`<div style="text-align:center;margin:14px 0;position:sticky;top:0;z-index:1"><span style="background:#1e1c14;border:1px solid #3a3321;color:#d7ad55;font-size:11px;padding:6px 16px;border-radius:20px;display:inline-block;box-shadow:0 2px 10px rgba(0,0,0,.3)">📅 ${label} • ${dateFull}</span></div>`;
+      lastDate=dStr;
+    }
+    const cls=msg.sender==="teacher"?"teacher":"parent";
+    const sender=msg.sender==="teacher"?"أنت":"ولي الأمر";
+    const seen=msg.seen?'<span style="color:#53bdeb">✓✓</span>':'<span style="color:#888">✓✓</span>';
+    const cnt=msg.type==='audio'?rAudioCloud(msg):esc(msg.text||'');
+    const timeStr=msg.time || new Date(msg.timestamp||Date.now()).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    html+=`<div class="msg ${cls}"><strong>${sender}</strong><br>${cnt}<span class="time">${esc(timeStr)} ${msg.sender==="teacher"?seen:''}</span></div>`;
+  });
+  el.innerHTML=html;
+  el.scrollTop=el.scrollHeight;
+  
+  let needsSave=false;
+  conv.forEach(m=>{ if(m.sender==='parent' && !m.seen){ m.seen=true; needsSave=true; } });
+  if(needsSave){ applyingRemote=true; setTimeout(()=>{ applyingRemote=false; save().catch(()=>{}); }, 2500); }
+};
+
+window.renderParentConversation = function(sid){
+  const el=document.getElementById('parentConversation');
+  if(!el) return;
+  let conv=db.conversations[sid]||[];
+  conv=[...conv].sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+  if(!conv.length){ el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>'; return; }
+  
+  function getDayName(d){ return ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][d.getDay()]; }
+  
+  let lastDate=''; let html='';
+  conv.forEach(msg=>{
+    const ts=msg.timestamp||Date.now();
+    const d=new Date(ts);
+    const dStr=d.toDateString();
+    if(dStr!==lastDate){
+      const today=new Date().toDateString();
+      const yest=new Date(Date.now()-86400000).toDateString();
+      let label='';
+      if(dStr===today) label='اليوم';
+      else if(dStr===yest) label='أمس';
+      else label=getDayName(d);
+      const dateFull=d.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+      html+=`<div style="text-align:center;margin:14px 0"><span style="background:#1e1c14;border:1px solid #3a3321;color:#d7ad55;font-size:11px;padding:6px 16px;border-radius:20px;display:inline-block">${label} • ${dateFull}</span></div>`;
+      lastDate=dStr;
+    }
+    const cls=msg.sender==="teacher"?"teacher":"parent";
+    const sender=msg.sender==="teacher"?"المعلم":"أنت";
+    const seen=msg.seen?'<span style="color:#53bdeb">✓✓</span>':'<span style="color:#888">✓✓</span>';
+    const cnt=msg.type==='audio'?rAudioCloud(msg):esc(msg.text||'');
+    const timeStr=msg.time || new Date(msg.timestamp||Date.now()).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    html+=`<div class="msg ${cls}"><strong>${sender}</strong><br>${cnt}<span class="time">${esc(timeStr)} ${msg.sender==="parent"?seen:''}</span></div>`;
+  });
+  el.innerHTML=html;
+  el.scrollTop=el.scrollHeight;
+  
+  let needsSave2=false;
+  conv.forEach(m=>{ if(m.sender==='teacher' && !m.seen){ m.seen=true; needsSave2=true; } });
+  if(needsSave2){ applyingRemote=true; setTimeout(()=>{ applyingRemote=false; save().catch(()=>{}); }, 2500); }
+};
+
+window.renderParentConversationSilent = window.renderParentConversation;
+
+
+// 9. Fix add student group dropdown based on level
+window.updateGroupDropdownForLevel = function(level, selectId){
+  const sel=document.getElementById(selectId||'studentGroup');
+  if(!sel) return;
+  const groups=db.customGroups||[];
+  let filtered=groups;
+  
+  // أولى إعدادي ملهاش مجموعات
+  if(level && level.includes('الأول')){
+    filtered=[];
+  }else{
+    filtered=groups.filter(g=>{
+      const gl = (typeof g==='object')? (g.level||'') : '';
+      if(!gl) return true;
+      return gl===level;
+    });
+    if(!filtered.length) filtered=groups; // لو مفيش مجموعات مخصصة للصف ده، اظهر الكل
+  }
+  
+  const cur=sel.value;
+  sel.innerHTML='<option value="">بدون مجموعة</option>' + filtered.map(g=>{
+    const n=typeof g==='string'?g:g.name;
+    return `<option value="${esc(n)}">${esc(n)}</option>`;
+  }).join('');
+  
+  if(cur && filtered.some(g=>( (typeof g==='string'?g:g.name)===cur))) sel.value=cur;
+  
+  const activeFilter=document.getElementById('studentGroupFilter')?.value;
+  if(activeFilter && !sel.value && filtered.some(g=>( (typeof g==='string'?g:g.name)===activeFilter))) sel.value=activeFilter;
+};
+
+(function(){
+  const origOpen=window.openAddModal;
+  if(origOpen){
+    window.openAddModal=function(){
+      origOpen();
+      setTimeout(()=>{
+        const lvl=document.getElementById('studentLevel');
+        const lvlFilter=document.getElementById('studentLevelFilter')?.value;
+        if(lvl && lvlFilter) lvl.value=lvlFilter;
+        updateGroupDropdownForLevel(lvl?.value||lvlFilter||'','studentGroup');
+        if(lvl) lvl.onchange=()=>updateGroupDropdownForLevel(lvl.value,'studentGroup');
+      },100);
+    };
+  }
+  const origEdit=window.editStudent;
+  if(origEdit){
+    window.editStudent=function(id){
+      origEdit(id);
+      setTimeout(()=>{
+        const s=db.students.find(x=>x.id===id);
+        if(!s) return;
+        const lvl=document.getElementById('studentLevel');
+        const grp=document.getElementById('studentGroup');
+        if(lvl){ lvl.value=s.level; lvl.onchange=()=>updateGroupDropdownForLevel(lvl.value,'studentGroup'); }
+        updateGroupDropdownForLevel(s.level,'studentGroup');
+        setTimeout(()=>{ if(grp) grp.value=s.group||''; },50);
+      },150);
+    };
+  }
+})();
+
+console.log('✅ All fixes V4 loaded');
+</script>
+
+<script>
+/* ===== إصلاحات: مسح متزامن + نافذة تأكيد أنيقة + مجاميع حسب الصف ===== */
+(function(){
+  const css = `
+  .kc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:kcFade .25s ease both}
+  .kc-box{background:linear-gradient(145deg,#151512,#0d0d0b);border:1px solid rgba(215,173,85,.45);border-radius:22px;padding:28px 26px;width:min(420px,90vw);text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 60px rgba(215,173,85,.12);animation:kcPop .3s cubic-bezier(.34,1.4,.64,1) both}
+  .kc-icon{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:rgba(215,173,85,.12);border:1px solid rgba(215,173,85,.5);animation:kcPulse 1.6s ease-in-out infinite}
+  .kc-msg{color:#f6f1e7;font-size:16px;line-height:1.8;margin-bottom:22px;font-weight:700}
+  .kc-actions{display:flex;gap:12px;justify-content:center}
+  .kc-btn{border:none;border-radius:14px;padding:12px 26px;font-weight:900;font-size:15px;cursor:pointer;transition:all .2s ease;font-family:inherit}
+  .kc-yes{background:linear-gradient(145deg,#e35d6a,#c23a48);color:#fff;box-shadow:0 8px 24px rgba(227,93,106,.35)}
+  .kc-yes:hover{transform:translateY(-2px);filter:brightness(1.12)}
+  .kc-no{background:rgba(255,255,255,.06);color:#f6f1e7;border:1px solid #292722}
+  .kc-no:hover{background:rgba(215,173,85,.15);border-color:rgba(215,173,85,.5)}
+  @keyframes kcFade{from{opacity:0}to{opacity:1}}
+  @keyframes kcPop{from{opacity:0;transform:scale(.85) translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes kcPulse{0%,100%{box-shadow:0 0 0 0 rgba(215,173,85,.35)}50%{box-shadow:0 0 0 14px rgba(215,173,85,0)}}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  window.uiConfirm = function(msg){
+    return new Promise(res=>{
+      const ov=document.createElement('div'); ov.className='kc-overlay';
+      ov.innerHTML=`<div class="kc-box"><div class="kc-icon">⚠️</div><div class="kc-msg">${msg}</div>
+        <div class="kc-actions"><button type="button" class="kc-btn kc-yes">نعم، تأكيد</button>
+        <button type="button" class="kc-btn kc-no">إلغاء</button></div></div>`;
+      const done=v=>{ov.remove();res(v);};
+      ov.querySelector('.kc-yes').onclick=()=>done(true);
+      ov.querySelector('.kc-no').onclick=()=>done(false);
+      ov.onclick=e=>{if(e.target===ov)done(false);};
+      document.body.appendChild(ov);
+    });
+  };
+
+  window.deleteStudent = async function(id){
+    const s=db.students.find(x=>x.id===id); if(!s) return;
+    const ok=await uiConfirm(`هل تريد حذف الطالب "${s.name}" وكل درجاته ومحادثاته؟`);
+    if(!ok) return;
+    delete db.conversations[id];
+    db.students=db.students.filter(x=>x.id!==id);
+    try{ await save(); }catch(e){}
+    try{ if(typeof studentsCol!=='undefined') await studentsCol.doc(String(s.id||s.code)).delete(); }catch(e){}
+    if(typeof renderAll==='function') renderAll();
+    if(typeof toast==='function') toast("تم حذف الطالب نهائياً");
+  };
+
+  window.deleteCustomGroup = async function(idx){
+    const ok=await uiConfirm('هل تريد حذف هذه المجموعة؟');
+    if(!ok) return;
+    db.customGroups.splice(idx,1);
+    try{ await save(); }catch(e){}
+    if(typeof renderCustomGroups==='function') renderCustomGroups();
+    if(typeof renderGroupFilter==='function') renderGroupFilter();
+    if(typeof toast==='function') toast('تم حذف المجموعة');
+  };
+
+  window.updateGroupDropdownForLevel = function(level, selectId){
+    const sel=document.getElementById(selectId||'studentGroup');
+    if(!sel) return;
+    const groups=db.customGroups||[];
+    const filtered=groups.filter(g=>{
+      const gl=(typeof g==='object')?(g.level||''):'';
+      if(!gl) return true;
+      return gl===level;
+    });
+    const cur=sel.value;
+    let html='<option value="">بدون مجموعة</option>';
+    if(level){
+      html+=filtered.map(g=>{const n=typeof g==='string'?g:g.name;return `<option value="${esc(n)}">${esc(n)}</option>`;}).join('');
+    }else{
+      html+=groups.map(g=>{const n=typeof g==='string'?g:g.name;return `<option value="${esc(n)}">${esc(n)}</option>`;}).join('');
+    }
+    sel.innerHTML=html;
+    if(cur && [...sel.options].some(o=>o.value===cur)) sel.value=cur;
+  };
+
+  document.addEventListener('change',e=>{
+    if(e.target && e.target.id==='gradeLevel'){
+      updateGroupDropdownForLevel(e.target.value,'studentGroup');
+    }
+  });
+
+  ['openAddModal','editStudent'].forEach(fn=>{
+    const orig=window[fn];
+    if(typeof orig==='function'){
+      window[fn]=function(){
+        const r=orig.apply(this,arguments);
+        setTimeout(()=>{
+          const gl=document.getElementById('gradeLevel');
+          const sg=document.getElementById('studentGroup');
+          const cur=sg?sg.value:'';
+          if(gl&&sg) updateGroupDropdownForLevel(gl.value,'studentGroup');
+          if(cur&&sg&&[...sg.options].some(o=>o.value===cur)) sg.value=cur;
+        },100);
+        return r;
+      };
+    }
+  });
+})();
+</script>
+
+
+<script>
+/* ===== إصلاحات الويب٧: تأكيد أنيق + مسح متزامن + مجاميع حسب الصف في كل الخانات + تحديد الكل للمفلترين + حفظ الطالب ===== */
+(function(){
+  /* ---------- أ) نافذة التأكيد الأنيقة (أسود/دهبي) ---------- */
+  const css = `
+  .kc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:kcFade .25s ease both}
+  .kc-box{background:linear-gradient(145deg,#151512,#0d0d0b);border:1px solid rgba(215,173,85,.45);border-radius:22px;padding:28px 26px;width:min(420px,90vw);text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 60px rgba(215,173,85,.12);animation:kcPop .3s cubic-bezier(.34,1.4,.64,1) both}
+  .kc-icon{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:rgba(215,173,85,.12);border:1px solid rgba(215,173,85,.5);animation:kcPulse 1.6s ease-in-out infinite}
+  .kc-msg{color:#f6f1e7;font-size:16px;line-height:1.8;margin-bottom:22px;font-weight:700}
+  .kc-actions{display:flex;gap:12px;justify-content:center}
+  .kc-btn{border:none;border-radius:14px;padding:12px 26px;font-weight:900;font-size:15px;cursor:pointer;transition:all .2s ease;font-family:inherit}
+  .kc-yes{background:linear-gradient(145deg,#e35d6a,#c23a48);color:#fff;box-shadow:0 8px 24px rgba(227,93,106,.35)}
+  .kc-yes:hover{transform:translateY(-2px);filter:brightness(1.12)}
+  .kc-no{background:rgba(255,255,255,.06);color:#f6f1e7;border:1px solid #292722}
+  .kc-no:hover{background:rgba(215,173,85,.15);border-color:rgba(215,173,85,.5)}
+  @keyframes kcFade{from{opacity:0}to{opacity:1}}
+  @keyframes kcPop{from{opacity:0;transform:scale(.85) translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes kcPulse{0%,100%{box-shadow:0 0 0 0 rgba(215,173,85,.35)}50%{box-shadow:0 0 0 14px rgba(215,173,85,0)}}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  window.uiConfirm = function(msg, yesText){
+    return new Promise(res=>{
+      const ov=document.createElement('div'); ov.className='kc-overlay';
+      ov.innerHTML='<div class="kc-box"><div class="kc-icon">⚠️</div><div class="kc-msg">'+msg+'</div>'+
+        '<div class="kc-actions"><button type="button" class="kc-btn kc-yes">'+(yesText||'نعم، تأكيد')+'</button>'+
+        '<button type="button" class="kc-btn kc-no">إلغاء</button></div></div>';
+      const done=v=>{ov.remove();res(v);};
+      ov.querySelector('.kc-yes').onclick=()=>done(true);
+      ov.querySelector('.kc-no').onclick=()=>done(false);
+      ov.onclick=e=>{if(e.target===ov)done(false);};
+      document.body.appendChild(ov);
+    });
+  };
+
+  /* ---------- ب) حذف طالب مع مزامنة القاعدة ---------- */
+  window.deleteStudent = async function(id){
+    const s=db.students.find(x=>x.id===id); if(!s) return;
+    const ok=await uiConfirm('هل تريد حذف الطالب "'+s.name+'" وكل درجاته ومحادثاته؟');
+    if(!ok) return;
+    delete db.conversations[id];
+    db.students=db.students.filter(x=>x.id!==id);
+    try{ await save(); }catch(e){}
+    try{ if(typeof studentsCol!=='undefined') await studentsCol.doc(String(s.id||s.code)).delete(); }catch(e){}
+    if(typeof renderAll==='function') renderAll();
+    if(typeof toast==='function') toast('تم حذف الطالب نهائياً');
+  };
+
+  /* ---------- ج) حذف مجموعة (الإدارة + القديم) بالنافذة الجديدة ---------- */
+  window.deleteCustomGroup = async function(idx){
+    const ok=await uiConfirm('هل تريد حذف هذه المجموعة؟');
+    if(!ok) return;
+    db.customGroups.splice(idx,1);
+    try{ await save(); }catch(e){}
+    if(typeof renderCustomGroups==='function') renderCustomGroups();
+    if(typeof renderGroupFilter==='function') renderGroupFilter();
+    if(typeof toast==='function') toast('تم حذف المجموعة');
+  };
+  window.deleteGroup = async function(idx){
+    const ok=await uiConfirm('حذف هذه المجموعة؟');
+    if(!ok) return;
+    customGroups.splice(idx,1);
+    try{ await save(); }catch(e){}
+    if(typeof renderGroups==='function') renderGroups();
+    if(typeof populateGroupDropdowns==='function') populateGroupDropdowns();
+    if(typeof toast==='function') toast('تم حذف المجموعة');
+  };
+
+  /* ---------- د) المجاميع حسب الصف — لكل الخانات ---------- */
+  const PAIRS = {
+    studentLevelFilter:'studentGroupFilter',   // خانة الطلاب
+    gradeFilterLevel:'gradeFilterGroup',       // خانة الدرجات
+    batchLevel:'batchGroup',                   // التسميع الجماعي
+    chatLevelFilter:'chatGroupFilter',         // خانة المحادثات
+    reportLevel:'reportGroup',                 // التقرير الشهري
+    gradeLevel:'studentGroup'                  // إضافة/تعديل طالب
+  };
+
+  window.updateGroupDropdownForLevel = function(level, selectId){
+    const sel=document.getElementById(selectId||'studentGroup');
+    if(!sel) return;
+    const groups=(db.customGroups&&db.customGroups.length)?db.customGroups:(typeof customGroups!=='undefined'?customGroups:[]);
+    const filtered=groups.filter(g=>{
+      const gl=(typeof g==='object')?(g.level||g.level===''?(g.level||''):''):'';
+      const lvl=(typeof g==='object')?String(g.level||''):'';
+      if(!lvl) return true; // مجموعة عامة تظهر لكل الصفوف
+      return lvl===level;
+    });
+    const cur=sel.value;
+    const placeholder=(selectId==='studentGroup')?'بدون مجموعة':'جميع المجموعات';
+    let html='<option value="">'+placeholder+'</option>';
+    if(level){
+      // لو مفيش مجموعات للصف المحدد: يفضل الخيار الفاضي بس
+      html+=filtered.map(g=>{
+        const n=(typeof g==='string')?g:(g.name||'');
+        return '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+      }).join('');
+    }else{
+      html+=groups.map(g=>{
+        const n=(typeof g==='string')?g:(g.name||'');
+        return '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+      }).join('');
+    }
+    sel.innerHTML=html;
+    if(cur && [...sel.options].some(o=>o.value===cur)) sel.value=cur;
+  };
+
+  function syncAllGroupDropdowns(){
+    Object.keys(PAIRS).forEach(lid=>{
+      const l=document.getElementById(lid);
+      if(l) updateGroupDropdownForLevel(l.value, PAIRS[lid]);
+    });
+  }
+
+  document.addEventListener('change',e=>{
+    if(!e.target) return;
+    if(PAIRS[e.target.id]){
+      updateGroupDropdownForLevel(e.target.value, PAIRS[e.target.id]);
+    }
+  });
+
+  // إعادة الضبط بعد أي تحديث للقوائم
+  ['populateGroupDropdowns','renderGroupFilter','renderAll'].forEach(fn=>{
+    const orig=window[fn];
+    if(typeof orig==='function'){
+      window[fn]=function(){
+        const r=orig.apply(this,arguments);
+        setTimeout(syncAllGroupDropdowns,60);
+        return r;
+      };
+    }
+  });
+
+  // بعد فتح نافذة إضافة/تعديل طالب
+  ['openAddModal','editStudent'].forEach(fn=>{
+    const orig=window[fn];
+    if(typeof orig==='function'){
+      window[fn]=function(){
+        const r=orig.apply(this,arguments);
+        setTimeout(()=>{
+          const gl=document.getElementById('gradeLevel');
+          if(gl) updateGroupDropdownForLevel(gl.value,'studentGroup');
+        },100);
+        return r;
+      };
+    }
+  });
+
+  /* ---------- هـ) تحديد الكل = بس للطلاب المفلترين (حسب الصف/المجموعة/البحث) ---------- */
+  window.selectAllStudents = function(){
+    if(typeof selectedForDelete==='undefined'){ window.selectedForDelete=new Set(); }
+    const levelFilter=document.getElementById('studentLevelFilter')?.value||'';
+    const groupFilter=document.getElementById('studentGroupFilter')?.value||'';
+    const q=(document.getElementById('studentSearch')?.value||'').trim().toLowerCase();
+    let list=db.students.filter(s=>studentMatches(s,q));
+    if(levelFilter)list=list.filter(s=>s.level===levelFilter);
+    if(groupFilter)list=list.filter(s=>s.group===groupFilter);
+    list.forEach(s=>selectedForDelete.add(s.id));
+    if(typeof renderStudents==='function') renderStudents();
+    if(typeof updateBulkDeleteCount==='function') updateBulkDeleteCount();
+    if(typeof toast==='function') toast('تم تحديد '+list.length+' طالب (المفلترين فقط)');
+  };
+
+  /* ---------- و) حفظ الطالب: قفل النافذة + إظهار الطالب فوراً ---------- */
+  const origSaveStudent = window.saveStudent;
+  if(typeof origSaveStudent==='function'){
+    window.saveStudent = function(){
+      const errEl=document.getElementById('studentError');
+      const beforeErr=errEl?errEl.innerHTML:'';
+      origSaveStudent.apply(this,arguments);
+      setTimeout(()=>{
+        const errNow=errEl?errEl.innerHTML:'';
+        if(errNow && errNow!==beforeErr) return; // فيه خطأ (بيانات ناقصة/كود مكرر) — سيب النافذة مفتوحة
+        // نجاح: اتأكد إن النافذة مقفولة
+        if(typeof closeModal==='function'){ try{closeModal('studentModal');}catch(e){} }
+        document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+        // أظهر الطالب: حدد الصف بتاعه وامسح الفلاتر اللي بتخفيه
+        const isEdit=(typeof editId!=='undefined' && editId);
+        const lvl=document.getElementById('gradeLevel')?.value||'';
+        const lv=document.getElementById('studentLevelFilter');
+        const gf=document.getElementById('studentGroupFilter');
+        const sr=document.getElementById('studentSearch');
+        if(!isEdit){
+          if(lv&&lvl) lv.value=lvl;
+          if(gf) gf.value='';
+          if(sr) sr.value='';
+        }
+        if(typeof renderAll==='function') renderAll();
+      },250);
+    };
+  }
+
+  /* ---------- ز) إرسال التقرير الشهري بالنافذة الأنيقة ---------- */
+  window.sendMonthlyReportToParents = async function(){
+    if(!currentReportResults.length){toast('اعرض التقرير أولاً');return}
+    const {month}=getReportResults();
+    const period=month==='all'?'الفترة المحددة':`شهر ${document.getElementById('reportMonth').selectedOptions[0]?.text||month}`;
+    const total=currentReportResults.length;
+    const ok=await uiConfirm(`إرسال ترتيب ونسبة <b style="color:#d7ad55">${total}</b> طالب إلى أولياء أمورهم؟<br><small style="color:#aaa395">${period}</small>`,'إرسال الآن 📨');
+    if(!ok) return;
+    currentReportResults.forEach((r,idx)=>{
+      const msg=`التقرير الشهري - ${period}
+الطالب: ${r.student.name}
+الترتيب: ${idx+1} من ${total}
+النسبة: ${r.avgScore}%.`;
+      addConversationMessage(r.student.id,'teacher',msg);
+    });
+    try{ await save(); }catch(e){}
+    toast(`تم إرسال التقرير لـ ${total} ولي أمر`);
+    if(typeof renderChatList==='function') renderChatList();
+  };
+})();
+</script>
+
+
+<script>
+/* ===== إصلاحات الجولة 3: ولي أمر فاكر تسجيله + حذف المحدد بشكل حلو + حفظ الطالب بفيدباك واضح ===== */
+(function(){
+  /* ---------- 1) ولي الأمر يفضل داخل حتى بعد قفل التطبيق ---------- */
+  window.addEventListener('load', function(){
+    let tries = 0;
+    const timer = setInterval(function(){
+      tries++;
+      try{
+        // لو المعلم داخل، مفعلش ولي الأمر
+        if(localStorage.getItem('teacherPermanentLogin_v4') || localStorage.getItem('teacherLogged')){
+          clearInterval(timer); return;
+        }
+        const code = localStorage.getItem('parent_session_code');
+        if(!code){ clearInterval(timer); return; }
+        if(typeof db==='undefined' || !db.students){ if(tries>50) clearInterval(timer); return; }
+        const s = db.students.find(x=>x.code===code);
+        if(s && typeof enterParentSession==='function'){
+          enterParentSession(code);
+          clearInterval(timer);
+        }else if(tries>50){ clearInterval(timer); } // بعد ~25 ثانية استسلم
+      }catch(e){ clearInterval(timer); }
+    }, 500);
+  });
+
+  /* ---------- 2) حذف المحدد: بالنافذة الأنيقة + مزامنة القاعدة ---------- */
+  window.doBulkDelete = async function(){
+    if(typeof selectedForDelete==='undefined' || selectedForDelete.size===0){
+      if(typeof toast==='function') toast('اختار طلاب أولاً'); return;
+    }
+    const count = selectedForDelete.size;
+    const ok = await uiConfirm('متأكد تحذف <b style="color:#d7ad55">' + count + '</b> طالب؟<br><small style="color:#aaa395">هيتمسحوا نهائياً مع درجاتهم ومحادثاتهم</small>', 'نعم، احذف 🗑️');
+    if(!ok) return;
+    const ids = [...selectedForDelete];
+    db.students = db.students.filter(s=>!selectedForDelete.has(s.id));
+    ids.forEach(id=>{ if(db.conversations) delete db.conversations[id]; });
+    selectedForDelete.clear();
+    if(typeof bulkDeleteMode!=='undefined') bulkDeleteMode = false;
+    try{ await save(); }catch(e){}
+    // مسح مستنداتهم من Firebase عشان ميرجعوش
+    try{
+      if(typeof studentsCol!=='undefined'){
+        for(const id of ids){
+          const s = db.students.find(x=>x.id===id);
+          const code = s ? (s.code||id) : id;
+          try{ await studentsCol.doc(String(code)).delete(); }catch(e2){}
+        }
+      }
+    }catch(e){}
+    const actions=document.getElementById('bulkDeleteActions');
+    if(actions) actions.classList.add('hidden');
+    const btn=document.getElementById('bulkDeleteBtn');
+    if(btn) btn.textContent='حذف مجموعة';
+    if(typeof renderAll==='function') renderAll();
+    if(typeof toast==='function') toast('تم حذف ' + count + ' طالب نهائياً ✓');
+  };
+
+  /* ---------- 3) حفظ الطالب: فيدباك واضح + قفل النافذة + إظهار الطالب فوراً ---------- */
+  window.saveStudent = async function(){
+    const errBox = document.getElementById('studentError');
+    const setErr = (m)=>{ if(errBox) errBox.innerHTML='<div class="message error">'+m+'</div>'; if(typeof toast==='function') toast('❌ '+m); };
+    const clearErr = ()=>{ if(errBox) errBox.innerHTML=''; };
+
+    const name=(document.getElementById('name').value||'').trim();
+    const code=(document.getElementById('code').value||'').trim();
+    const level=document.getElementById('gradeLevel').value;
+    const group=document.getElementById('studentGroup').value;
+
+    if(!name){ setErr('اكتب اسم الطالب الأول'); return; }
+    if(!code){ setErr('اكتب كود الطالب'); return; }
+    if(db.students.some(s=>s.code===code && s.id!==editId)){ setErr('الكود "'+code+'" مستخدم بالفعل لطالب تاني'); return; }
+    clearErr();
+
+    const isEdit = !!editId;
+    let savedStudent = null;
+    if(isEdit){
+      const s=db.students.find(x=>x.id===editId);
+      if(!s){ setErr('حصل خطأ، جرب تاني'); return; }
+      s.name=name; s.code=code; s.level=level; s.group=group;
+      savedStudent=s;
+    }else{
+      const now=new Date();
+      savedStudent={id:'s'+Date.now(), name:name, code:code, level:level, group:group||'', grades:[], addedDate:now.toLocaleDateString('ar-EG'), addedTimestamp:now.getTime()};
+      db.students.push(savedStudent);
+    }
+
+    if(typeof toast==='function') toast('⏳ جاري الحفظ...');
+    try{
+      await save(isEdit?{}:{singleStudent:savedStudent});
+    }catch(err){
+      if(!isEdit){ db.students=db.students.filter(x=>x.code!==code); if(typeof renderAll==='function') renderAll(); }
+      setErr('الحفظ فشل - اتأكد من النت وحاول تاني');
+      return;
+    }
+
+    // نجاح: اقفل النافذة
+    if(typeof closeModal==='function'){ try{ closeModal('studentModal'); }catch(e){} }
+    const modal=document.getElementById('studentModal'); if(modal) modal.classList.add('hidden');
+
+    if(!isEdit){
+      // أظهر الطالب فوراً: كل الصفوف + بحث باسمه
+      const lv=document.getElementById('studentLevelFilter'); if(lv) lv.value='';
+      const gf=document.getElementById('studentGroupFilter'); if(gf) gf.value='';
+      const sr=document.getElementById('studentSearch'); if(sr) sr.value=name;
+      if(typeof renderAll==='function') renderAll();
+      if(typeof toast==='function') toast('✅ تم إضافة الطالب "'+name+'" - شوفه تحت في النتائج');
+    }else{
+      if(typeof renderAll==='function') renderAll();
+      if(typeof toast==='function') toast('✅ تم تعديل بيانات "'+name+'"');
+    }
+  };
+})();
+</script>
+
+
+<script>
+/* ===== الجولة 4: جلسة ولي أمر لا تنتهي + حذف رسائل واتساب (6 ساعات) + فلاتر محفوظة + منع اختفاء القوائم ===== */
+(function(){
+  /* ---------- أ) CSS: منع نسخ الرسائل + شكل المحذوفة + زرار الحذف ---------- */
+  const css = `
+  .msg{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;position:relative}
+  .msg.deleted{background:rgba(255,255,255,.03)!important;border:1px dashed rgba(215,173,85,.25)!important;color:#8a8478!important;font-style:italic}
+  .msg.deleted strong,.msg.deleted .time{display:none}
+  .msgDel{position:absolute;top:6px;left:6px;background:rgba(227,93,106,.15);color:#ff8792;border:1px solid rgba(227,93,106,.3);width:24px;height:24px;border-radius:8px;font-size:12px;cursor:pointer;display:grid;place-items:center;opacity:0;transition:opacity .18s ease;line-height:1}
+  .msg:hover .msgDel{opacity:1}
+  @media (hover:none){.msgDel{opacity:.75}}
+  .msgDel:hover{background:#e35d6a;color:#fff}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  document.addEventListener('contextmenu',e=>{ if(e.target.closest && e.target.closest('.msg')) e.preventDefault(); });
+
+  const SIX_H = 6*60*60*1000;
+
+  /* ---------- ب) حذف رسالة (واتساب: عند الجميع، خلال 6 ساعات) ---------- */
+  window.deleteChatMessage = async function(sid, idx, viewer){
+    const conv = db.conversations[sid]||[];
+    const m = conv[idx];
+    if(!m || m.deleted) return;
+    const isTeacher = (viewer==='teacher');
+    if(!isTeacher && m.sender!=='parent'){ toast('مينفعش تمسح رسايل المعلم'); return; }
+    if(Date.now() - (m.timestamp||0) > SIX_H){ toast('⏰ فاتت 6 ساعات - مينفعش تمسح الرسالة دي'); return; }
+    const ok = await uiConfirm('حذف الرسالة عند الجميع؟<br><small style="color:#aaa395">زي الواتساب - مش هترجع تاني</small>', 'حذف 🗑️');
+    if(!ok) return;
+    m.deleted = true; m.text=''; m.note='';
+    try{ await save(); }catch(e){}
+    if(isTeacher && typeof renderConversation==='function' && typeof currentChatStudentId!=='undefined') renderConversation(currentChatStudentId);
+    if(typeof renderChatList==='function') renderChatList();
+    toast('تم حذف الرسالة عند الجميع');
+  };
+
+  function msgHTML(msg, idx, sid, viewer){
+    if(msg.deleted) return '<div class="msg deleted">🚫 تم حذف هذه الرسالة</div>';
+    const cls = msg.sender==='teacher' ? 'teacher' : 'parent';
+    const sender = viewer==='teacher' ? (msg.sender==='teacher'?'أنت':'ولي الأمر') : (msg.sender==='teacher'?'المعلم':'أنت');
+    const seen = msg.seen ? '✓✓' : '✓';
+    const canDel = (viewer==='teacher') || (msg.sender==='parent');
+    const delBtn = canDel ? '<button type="button" class="msgDel" title="حذف" onclick="deleteChatMessage(\''+sid+'\','+idx+',\''+viewer+'\')">🗑</button>' : '';
+    const cnt = msg.type==='audio' ? rAudioCloud(msg) : esc(msg.text);
+    return '<div class="msg '+cls+'">'+delBtn+'<strong>'+sender+'</strong><br>'+cnt+(msg.note?'<br><small>ملحوظة: '+esc(msg.note)+'</small>':'')+'<span class="time">'+esc(msg.time||'')+' '+(msg.sender===(viewer==='teacher'?'teacher':'parent')?seen:'')+'</span></div>';
+  }
+
+  window.renderConversation = function(sid){
+    const el=document.getElementById('chatConversation');
+    if(!el) return;
+    const conv=db.conversations[sid]||[];
+    if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}
+    el.innerHTML=conv.map((m,i)=>msgHTML(m,i,sid,'teacher')).join('');
+    el.scrollTop=el.scrollHeight;
+  };
+  window.renderParentConversation = function(sid){
+    const el=document.getElementById('parentConversation');
+    if(!el) return;
+    const conv=db.conversations[sid]||[];
+    if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}
+    el.innerHTML=conv.map((m,i)=>msgHTML(m,i,sid,'parent')).join('');
+    el.scrollTop=el.scrollHeight;
+  };
+  window.renderParentConversationSilent = window.renderParentConversation;
+
+  /* ---------- ج) جلسة ولي الأمر: لا تنتهي أبداً (حتى لو رجع من التطبيق من غير reload) ---------- */
+  window.restoreParentSession = function(){
+    try{
+      if(localStorage.getItem('teacherPermanentLogin_v4') || localStorage.getItem('teacherLogged')) return;
+      if(typeof parentLoggedInCode!=='undefined' && parentLoggedInCode) return; // داخل فعلاً
+      const code = localStorage.getItem('parent_session_code');
+      if(!code || typeof db==='undefined' || !db.students) return;
+      const s = db.students.find(x=>x.code===code);
+      if(s && typeof enterParentSession==='function') enterParentSession(code);
+    }catch(e){}
+  };
+  window.addEventListener('load', ()=>{
+    window.restoreParentSession();
+    let n=0;
+    const t=setInterval(()=>{ n++; window.restoreParentSession(); if(n>120) clearInterval(t); }, 500);
+  });
+  window.addEventListener('pageshow', ()=>window.restoreParentSession());
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(()=>window.restoreParentSession(),300); });
+
+  /* ---------- د) حفظ الطالب: مفيش بحث تلقائي — الفلاتر بتاعتك بتفضل زي ما هي + رسالة توضح هيبان ولا لأ ---------- */
+  window.saveStudent = async function(){
+    const errBox=document.getElementById('studentError');
+    const setErr=(m)=>{ if(errBox) errBox.innerHTML='<div class="message error">'+m+'</div>'; toast('❌ '+m); };
+    const name=(document.getElementById('name').value||'').trim();
+    const code=(document.getElementById('code').value||'').trim();
+    const level=document.getElementById('gradeLevel').value;
+    const group=document.getElementById('studentGroup').value;
+    if(!name){ setErr('اكتب اسم الطالب الأول'); return; }
+    if(!code){ setErr('اكتب كود الطالب'); return; }
+    if(db.students.some(s=>s.code===code && s.id!==editId)){ setErr('الكود "'+code+'" مستخدم بالفعل'); return; }
+    if(errBox) errBox.innerHTML='';
+
+    const isEdit=!!editId;
+    let saved=null;
+    if(isEdit){
+      saved=db.students.find(x=>x.id===editId);
+      if(!saved){ setErr('حصل خطأ، جرب تاني'); return; }
+      saved.name=name; saved.code=code; saved.level=level; saved.group=group;
+    }else{
+      const now=new Date();
+      saved={id:'s'+Date.now(),name:name,code:code,level:level,group:group||'',grades:[],addedDate:now.toLocaleDateString('ar-EG'),addedTimestamp:now.getTime()};
+      db.students.push(saved);
+    }
+    toast('⏳ جاري الحفظ...');
+    try{ await save(isEdit?{}:{singleStudent:saved}); }
+    catch(err){
+      if(!isEdit){ db.students=db.students.filter(x=>x.code!==code); if(typeof renderAll==='function') renderAll(); }
+      setErr('الحفظ فشل - اتأكد من النت وحاول تاني'); return;
+    }
+    try{ closeModal('studentModal'); }catch(e){}
+    const modal=document.getElementById('studentModal'); if(modal) modal.classList.add('hidden');
+
+    if(!isEdit){
+      // افحص هل الطالب هيبان تحت الفلاتر الحالية وقوله
+      const lv=(document.getElementById('studentLevelFilter')?.value)||'';
+      const gf=(document.getElementById('studentGroupFilter')?.value)||'';
+      const q=((document.getElementById('studentSearch')?.value)||'').trim().toLowerCase();
+      const visible=(!lv||saved.level===lv) && (!gf||saved.group===gf) && (!q||studentMatches(saved,q));
+      if(visible){
+        toast('✅ تم إضافة "'+name+'" - ظاهر عندك في القايمة');
+      }else{
+        let why=[];
+        if(lv && saved.level!==lv) why.push('الصف ('+lv+')');
+        if(gf && saved.group!==gf) why.push('المجموعة ('+gf+')');
+        if(q && !studentMatches(saved,q)) why.push('البحث ("'+q+'")');
+        toast('⚠️ تم إضافة "'+name+'" بس مش هيبان عشان أنت محدد: '+why.join(' + '));
+      }
+    }else{
+      toast('✅ تم تعديل بيانات "'+name+'"');
+    }
+    if(typeof renderAll==='function') renderAll();
+  };
+
+  /* ---------- هـ) منع اختفاء قوائم المجاميع: لو مفيش بيانات متمسش الوجود ---------- */
+  const _origUGD = window.updateGroupDropdownForLevel;
+  window.updateGroupDropdownForLevel = function(level, selectId){
+    const sel=document.getElementById(selectId||'studentGroup');
+    if(sel){
+      const groups=(typeof db!=='undefined'&&db.customGroups)?db.customGroups:(typeof customGroups!=='undefined'?customGroups:[]);
+      if(!groups.length && sel.options.length>1) return; // حافظ على الموجود
+    }
+    if(typeof _origUGD==='function') return _origUGD(level, selectId);
+  };
+})();
+</script>
+
+
+<script>
+/* ===== الجولة 5: رسالة محذوفة تفضل في جهتها + حماية إضافية لجلسات الجهاز ===== */
+(function(){
+  /* أ) الرسالة المحذوفة تفضل ناحية صاحبها (يمين/شمال) */
+  function msgHTML5(msg, idx, sid, viewer){
+    const cls = msg.sender==='teacher' ? 'teacher' : 'parent';
+    if(msg.deleted) return '<div class="msg deleted '+cls+'">🚫 تم حذف هذه الرسالة</div>';
+    const sender = viewer==='teacher' ? (msg.sender==='teacher'?'أنت':'ولي الأمر') : (msg.sender==='teacher'?'المعلم':'أنت');
+    const seen = msg.seen ? '✓✓' : '✓';
+    const canDel = (viewer==='teacher') || (msg.sender==='parent');
+    const delBtn = canDel ? '<button type="button" class="msgDel" title="حذف" onclick="deleteChatMessage(\''+sid+'\','+idx+',\''+viewer+'\')">🗑</button>' : '';
+    const cnt = msg.type==='audio' ? rAudioCloud(msg) : esc(msg.text);
+    return '<div class="msg '+cls+'">'+delBtn+'<strong>'+sender+'</strong><br>'+cnt+(msg.note?'<br><small>ملحوظة: '+esc(msg.note)+'</small>':'')+'<span class="time">'+esc(msg.time||'')+' '+(msg.sender===(viewer==='teacher'?'teacher':'parent')?seen:'')+'</span></div>';
+  }
+  window.renderConversation = function(sid){
+    const el=document.getElementById('chatConversation'); if(!el) return;
+    const conv=db.conversations[sid]||[];
+    if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}
+    el.innerHTML=conv.map((m,i)=>msgHTML5(m,i,sid,'teacher')).join('');
+    el.scrollTop=el.scrollHeight;
+  };
+  window.renderParentConversation = function(sid){
+    const el=document.getElementById('parentConversation'); if(!el) return;
+    const conv=db.conversations[sid]||[];
+    if(!conv.length){el.innerHTML='<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';return}
+    el.innerHTML=conv.map((m,i)=>msgHTML5(m,i,sid,'parent')).join('');
+    el.scrollTop=el.scrollHeight;
+  };
+  window.renderParentConversationSilent = window.renderParentConversation;
+
+  /* ب) استعادة ولي الأمر: حارس أقوى يشمل كل مفاتيح المعلم */
+  window.restoreParentSession = function(){
+    try{
+      if(localStorage.getItem('teacherLogged')||localStorage.getItem('teacherPermanentLogin_v4')||localStorage.getItem('teacher_session_active')) return;
+      if(typeof parentLoggedInCode!=='undefined' && parentLoggedInCode) return;
+      const code = localStorage.getItem('parent_session_code');
+      if(!code || typeof db==='undefined' || !db.students) return;
+      const s = db.students.find(x=>x.code===code);
+      if(s && typeof enterParentSession==='function') enterParentSession(code);
+    }catch(e){}
+  };
+  window.addEventListener('pageshow', ()=>window.restoreParentSession());
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(()=>window.restoreParentSession(),300); });
+})();
+</script>
+
+<script>
+/* ===== SESSION PERSISTENCE FINAL FIX — يبقى مسجل في الاثنين =====
+   - المعلم وولي الأمر كل واحد يفضل داخل على الجهاز
+   - آخر دور استخدمته هو اللي يفتح تلقائي
+   - ينتظر Firebase قبل ما يرجع ولي الأمر
+   - يشتغل مع إغلاق التطبيق الكامل (Median / WebView)
+*/
+(function(){
+  const P_KEY = "parent_session_code";
+  const T_KEYS = ["teacher_session_active", "teacherLogged", "teacherPermanentLogin_v4"];
+
+  function isTeacherSaved(){
+    try{
+      return T_KEYS.some(k => {
+        const v = localStorage.getItem(k);
+        return v === "true" || v === "1";
+      });
+    }catch(e){ return false; }
+  }
+  function isParentSaved(){
+    try{ return !!localStorage.getItem(P_KEY); }catch(e){ return false; }
+  }
+  function getParentCode(){
+    try{ return localStorage.getItem(P_KEY) || ""; }catch(e){ return ""; }
+  }
+  function clearTeacherKeys(){
+    try{ T_KEYS.forEach(k => localStorage.removeItem(k)); }catch(e){}
+  }
+  function clearParentKey(){
+    try{ localStorage.removeItem(P_KEY); }catch(e){}
+  }
+  function saveTeacherKeys(){
+    try{
+      localStorage.setItem("teacher_session_active", "true");
+      localStorage.setItem("teacherLogged", "true");
+      localStorage.setItem("teacherPermanentLogin_v4", "1");
+      localStorage.setItem("last_role", "teacher");
+    }catch(e){}
+  }
+  function saveParentKey(code){
+    try{
+      localStorage.setItem(P_KEY, code);
+      localStorage.setItem("last_role", "parent");
+    }catch(e){}
+  }
+
+  function showTeacherUI(){
+    const parentPage = document.getElementById("parentPage");
+    const teacherPage = document.getElementById("teacherPage");
+    const teacherBtn = document.querySelector(".teacherBtn");
+    if(!teacherPage) return false;
+    if(parentPage) parentPage.classList.add("hidden");
+    teacherPage.classList.remove("hidden");
+    if(teacherBtn) teacherBtn.classList.add("hidden");
+    document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
+    if(typeof renderAll === "function") {
+      try{ renderAll(); }catch(e){}
+    }
+    return true;
+  }
+
+  function showParentUI(code){
+    if(typeof enterParentSession !== "function") return false;
+    if(typeof db === "undefined" || !db.students || !db.students.length) return false;
+    const ok = enterParentSession(code);
+    if(ok){
+      const teacherPage = document.getElementById("teacherPage");
+      if(teacherPage) teacherPage.classList.add("hidden");
+      const parentPage = document.getElementById("parentPage");
+      if(parentPage) parentPage.classList.remove("hidden");
+    }
+    return ok;
+  }
+
+  function getPreferredRole(){
+    try{
+      const last = localStorage.getItem("last_role");
+      if(last === "teacher" && isTeacherSaved()) return "teacher";
+      if(last === "parent" && isParentSaved()) return "parent";
+    }catch(e){}
+    if(isTeacherSaved()) return "teacher";
+    if(isParentSaved()) return "parent";
+    return null;
+  }
+
+  let restoring = false;
+  function tryRestore(force){
+    if(restoring && !force) return;
+    restoring = true;
+    try{
+      const role = getPreferredRole();
+      if(!role){ restoring = false; return; }
+
+      if(role === "teacher"){
+        showTeacherUI();
+        restoring = false;
+        return;
+      }
+
+      const code = getParentCode();
+      if(!code){ restoring = false; return; }
+
+      if(typeof db !== "undefined" && db.students && db.students.length){
+        const ok = showParentUI(code);
+        if(!ok) clearParentKey();
+        restoring = false;
+        return;
+      }
+
+      restoring = false;
+      setTimeout(() => tryRestore(true), 400);
+    }catch(e){
+      restoring = false;
+    }
+  }
+
+  const _origLogin = window.login;
+  window.login = function(){
+    const codeEl = document.getElementById("loginCode");
+    const val = codeEl ? codeEl.value : "";
+    if(val === (typeof TEACHER_CODE !== "undefined" ? TEACHER_CODE : "777")){
+      saveTeacherKeys();
+      clearParentKey();
+      if(typeof parentLoggedInCode !== "undefined") parentLoggedInCode = null;
+    }
+    if(typeof _origLogin === "function") return _origLogin.apply(this, arguments);
+    if(val === "777"){
+      document.getElementById("loginModal")?.classList.add("hidden");
+      showTeacherUI();
+    }
+  };
+
+  const _origLogout = window.logout;
+  window.logout = function(){
+    clearTeacherKeys();
+    try{ localStorage.removeItem("last_role"); }catch(e){}
+    if(typeof _origLogout === "function") return _origLogout.apply(this, arguments);
+    document.getElementById("teacherPage")?.classList.add("hidden");
+    document.getElementById("parentPage")?.classList.remove("hidden");
+    document.querySelector(".teacherBtn")?.classList.remove("hidden");
+    const pr = document.getElementById("parentResult");
+    if(pr) pr.innerHTML = "";
+    document.getElementById("parentHero")?.classList.remove("hidden");
+    document.getElementById("parentSearchBox")?.classList.remove("hidden");
+  };
+
+  const _origParentLogout = window.parentLogout;
+  window.parentLogout = function(){
+    clearParentKey();
+    try{ localStorage.removeItem("last_role"); }catch(e){}
+    if(typeof parentLoggedInCode !== "undefined") parentLoggedInCode = null;
+    if(typeof _origParentLogout === "function") return _origParentLogout.apply(this, arguments);
+  };
+
+  const _origEnter = window.enterParentSession;
+  if(typeof _origEnter === "function"){
+    window.enterParentSession = function(code){
+      const ok = _origEnter.apply(this, arguments);
+      if(ok){
+        saveParentKey(code);
+        clearTeacherKeys();
+      }
+      return ok;
+    };
+  }
+
+  function startRestoreLoop(){
+    tryRestore(true);
+    let n = 0;
+    const t = setInterval(() => {
+      n++;
+      tryRestore(true);
+      if(n > 40) clearInterval(t);
+    }, 400);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startRestoreLoop);
+  }else{
+    startRestoreLoop();
+  }
+
+  window.addEventListener("pageshow", () => {
+    setTimeout(() => tryRestore(true), 200);
+  });
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden) setTimeout(() => tryRestore(true), 250);
+  });
+  window.addEventListener("focus", () => {
+    setTimeout(() => tryRestore(true), 200);
+  });
+
+  const _origApply = window.applyRemoteData;
+  if(typeof _origApply === "function"){
+    window.applyRemoteData = function(data){
+      const r = _origApply.apply(this, arguments);
+      setTimeout(() => tryRestore(true), 150);
+      return r;
+    };
+  }
+
+  console.log("✅ Session persistence FINAL loaded — المعلم وولي الأمر يفضلوا مسجلين");
+})();
+</script>
+
+<script>
+/* ===== FIX V2: وقف رعشة الشات + جلسة المعلم بعد الخروج ===== */
+(function(){
+  // ---------- 1) جلسة المعلم: بعد تسجيل الخروج ميرجعش لوحده ----------
+  const LOGOUT_FLAG = "teacher_explicit_logout";
+
+  // غلّف logout عشان يسجّل إن الخروج كان يدوي
+  const prevLogout = window.logout;
+  window.logout = function(){
+    try{
+      localStorage.setItem(LOGOUT_FLAG, "1");
+      localStorage.removeItem("teacher_session_active");
+      localStorage.removeItem("teacherLogged");
+      localStorage.removeItem("teacherPermanentLogin_v4");
+      localStorage.removeItem("last_role");
+    }catch(e){}
+    if(typeof prevLogout === "function") return prevLogout.apply(this, arguments);
+  };
+
+  // غلّف login عشان يمسح علم الخروج
+  const prevLogin = window.login;
+  window.login = function(){
+    try{ localStorage.removeItem(LOGOUT_FLAG); }catch(e){}
+    if(typeof prevLogin === "function") return prevLogin.apply(this, arguments);
+  };
+
+  // امنع أي استعادة معلم لو المستخدم خرج يدوياً
+  function blockTeacherRestoreIfLoggedOut(){
+    try{
+      if(localStorage.getItem(LOGOUT_FLAG) === "1"){
+        localStorage.removeItem("teacher_session_active");
+        localStorage.removeItem("teacherLogged");
+        localStorage.removeItem("teacherPermanentLogin_v4");
+        // لو last_role كان teacher وخرج → امسحه
+        if(localStorage.getItem("last_role") === "teacher"){
+          localStorage.removeItem("last_role");
+        }
+      }
+    }catch(e){}
+  }
+  blockTeacherRestoreIfLoggedOut();
+  setInterval(blockTeacherRestoreIfLoggedOut, 800);
+
+  // ---------- 2) منع إعادة بناء صفحة ولي الأمر لو هو أصلاً داخل ----------
+  // (ده السبب الرئيسي للرعشة: enterParentSession بيعيد كتابة كل الـ HTML)
+  const prevEnter = window.enterParentSession;
+  if(typeof prevEnter === "function"){
+    window.enterParentSession = function(code){
+      // لو بالفعل داخل بنفس الكود، ومتشيلش الصفحة كلها
+      if(typeof parentLoggedInCode !== "undefined" && parentLoggedInCode === code){
+        const convEl = document.getElementById("parentConversation");
+        if(convEl){
+          // بس حدّث المحادثة بهدوء
+          const s = (db.students||[]).find(x => x.code === code);
+          if(s && typeof renderParentConversationSilent === "function"){
+            renderParentConversationSilent(s.id);
+          } else if(s && typeof renderParentConversation === "function"){
+            renderParentConversation(s.id);
+          }
+          return true;
+        }
+      }
+      return prevEnter.apply(this, arguments);
+    };
+  }
+
+  // ---------- 3) رسم المحادثة بدون رعشة (حفظ السكرول + بدون إعادة كاملة لو نفس المحتوى) ----------
+  let lastParentHTML = "";
+  let lastTeacherHTML = "";
+  let parentRenderLock = false;
+
+  function smartRenderParent(sid){
+    const el = document.getElementById("parentConversation");
+    if(!el || parentRenderLock) return;
+    parentRenderLock = true;
+    try{
+      const conv = (db.conversations && db.conversations[sid]) || [];
+      // استخدم آخر تعريف للـ render لو موجود، وإلا ابني HTML بسيط
+      let html = "";
+      if(!conv.length){
+        html = '<div class="empty" style="padding:15px">لا توجد رسائل بعد.</div>';
+      } else {
+        // لو في دالة render أصلية معقدة، نستدعيها لكن نحفظ السكرول
+        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 100;
+        const prevScroll = el.scrollTop;
+        if(typeof window.__origRenderParentConv === "function"){
+          window.__origRenderParentConv(sid);
+        } else if(typeof renderParentConversation === "function"){
+          // تجنب حلقة لا نهائية: استدعي النسخة الحالية مرة واحدة
+          const fn = renderParentConversation;
+          // temporary: build minimal stable HTML similar to last overrides
+          html = conv.map(function(msg, idx){
+            if(msg.deleted) return '<div class="msg deleted '+(msg.sender==="teacher"?"teacher":"parent")+'">🚫 تم حذف هذه الرسالة</div>';
+            const cls = msg.sender === "teacher" ? "teacher" : "parent";
+            const sender = msg.sender === "teacher" ? "المعلم" : "أنت";
+            const seen = msg.seen ? "✓✓" : "✓";
+            const canDel = msg.sender === "parent";
+            const delBtn = canDel ? '<button type="button" class="msgDel" title="حذف" onclick="deleteChatMessage(\''+sid+'\','+idx+',\'parent\')">🗑</button>' : '';
+            let cnt = "";
+            if(msg.type === "audio" && typeof rAudioCloud === "function"){
+              try{ cnt = rAudioCloud(msg); }catch(e){ cnt = "🎤 رسالة صوتية"; }
+            } else {
+              cnt = (typeof esc === "function" ? esc(msg.text||"") : (msg.text||""));
+            }
+            const timeStr = msg.time || "";
+            return '<div class="msg '+cls+'">'+delBtn+'<strong>'+sender+'</strong><br>'+cnt+'<span class="time">'+timeStr+(msg.sender==="parent"?" "+seen:"")+'</span></div>';
+          }).join("");
+          if(html === lastParentHTML){
+            parentRenderLock = false;
+            return; // نفس المحتوى — مفيش حاجة تتغير
+          }
+          lastParentHTML = html;
+          el.innerHTML = html;
+        }
+        if(nearBottom){
+          el.scrollTop = el.scrollHeight;
+        } else {
+          el.scrollTop = prevScroll;
+        }
+      }
+      if(html && !conv.length){
+        if(html !== lastParentHTML){
+          lastParentHTML = html;
+          el.innerHTML = html;
+        }
+      }
+    }catch(e){ console.warn(e); }
+    parentRenderLock = false;
+  }
+
+  // خزّن آخر نسخة "أصلية" قبل ما نغطيها
+  if(typeof renderParentConversation === "function" && !window.__origRenderParentConv){
+    window.__origRenderParentConv = renderParentConversation;
+  }
+
+  // دالة صامتة حقيقية (بدون قفز السكرول لو المستخدم فوق)
+  window.renderParentConversationSilent = function(sid){
+    smartRenderParent(sid);
+  };
+
+  // عند الإرسال: حدّث بهدوء بدل ما يعيد بناء الصفحة
+  const prevSendParent = window.sendParentMessage;
+  window.sendParentMessage = function(sid){
+    const input = document.getElementById("parentMessageInput");
+    const text = input ? input.value.trim() : "";
+    if(!text){
+      if(typeof toast === "function") toast("اكتب رسالة");
+      return;
+    }
+    if(typeof addConversationMessage === "function"){
+      addConversationMessage(sid, "parent", text);
+    }
+    if(input){ input.value = ""; }
+    // رسم صامت + سكرول لتحت
+    lastParentHTML = ""; // إجبار تحديث
+    smartRenderParent(sid);
+    const el = document.getElementById("parentConversation");
+    if(el) el.scrollTop = el.scrollHeight;
+    if(input) input.focus();
+  };
+
+  // ---------- 4) تقليل إعادة الرسم من Firebase أثناء الشات ----------
+  const prevRefresh = window.refreshUIFromRemote;
+  if(typeof prevRefresh === "function"){
+    window.refreshUIFromRemote = function(){
+      // لو ولي الأمر داخل والمحادثة مفتوحة — استخدم الرسم الصامت فقط
+      const parentConvEl = document.getElementById("parentConversation");
+      if(parentConvEl && typeof parentLoggedInCode !== "undefined" && parentLoggedInCode){
+        const sid = (db.students||[]).find(x => x.code === parentLoggedInCode)?.id;
+        if(sid){
+          const conv = db.conversations[sid] || [];
+          // حدّث بس لو عدد الرسائل اتغير أو في رسائل جديدة
+          if(typeof lastConvLen === "undefined" || conv.length !== lastConvLen){
+            if(typeof lastConvLen !== "undefined") lastConvLen = conv.length;
+            smartRenderParent(sid);
+          }
+          return; // متعملش renderAll ولا rebuild
+        }
+      }
+      return prevRefresh.apply(this, arguments);
+    };
+  }
+
+  // ---------- 5) CSS خفيف يمنع رعشة التخطيط ----------
+  const style = document.createElement("style");
+  style.textContent = `
+    #parentConversation, #chatConversation {
+      overflow-anchor: none;
+      will-change: auto;
+    }
+    .msg {
+      contain: layout style;
+    }
+    .conversation {
+      scroll-behavior: auto !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  console.log("✅ Chat shake + teacher logout fix loaded");
+})();
+</script>
+
+</body>
+</html>
